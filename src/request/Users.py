@@ -4,7 +4,7 @@ import asyncio
 
 class Auth:
     @staticmethod
-    async def register(login, password, email, lastname, firstname, middlename, phone, birthday, releid, typeusr):
+    async def register(login, password, email, lastname, firstname, middlename, phone, birthday, releid, typeusr) -> status:
         async with aiohttp.ClientSession() as session:
             async with session.post('https://test.vcc.uriit.ru/auth/register', json={
                 "login": login,
@@ -18,8 +18,6 @@ class Auth:
                 "roleId": releid,
                 "type": typeusr
             }) as res:
-                if res.status == 201:
-                    return 1
                 return res.status
 
     @staticmethod
