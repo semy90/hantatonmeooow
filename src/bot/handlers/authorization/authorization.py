@@ -1,3 +1,5 @@
+import pprint
+import re
 from aiogram import F, Router
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
@@ -8,26 +10,26 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.states.authorization import AuthorizationState
+from request.Users import Auth
 from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorization_keyboard
 from src.database.gateway import Database
 from src.database.models.user import UserModel
 from bot.filters.registred import AuthorizationFilter, NotAuthorizationFilter
+from utils.changer import change
 
 autoriz_router = Router(name=__name__)
 
 
 # кнопка отмены
 @autoriz_router.message(F.text == "Авторизоваться", NotAuthorizationFilter(), StateFilter(None))
-async def autoriz_handler(message: Message, session: AsyncSession, state: FSMContext):
+async def autoriz_handler(message: Message, state: FSMContext):
+    await message.answer("Введите логин: ", reply_markup=ReplyKeyboardRemove())
+    await state.set_state(AuthorizationState.waiting_login)
 
 
-    await message.answer("Введите e-mail:", reply_markup=ReplyKeyboardRemove())
-    await state.set_state(AuthorizationState.waiting_email)
-
-
-@autoriz_router.message(AuthorizationState.waiting_email)
+@autoriz_router.message(AuthorizationState.waiting_login)
 async def auto_waiting_email(message: Message, state: FSMContext):
-    await state.update_data(e_mail=message.text.lower())
+    await state.update_data(login=change(message.text))
 
     await message.answer("Отлично, теперь пришлите пароль: ")
     await state.set_state(AuthorizationState.waiting_password)
@@ -35,7 +37,7 @@ async def auto_waiting_email(message: Message, state: FSMContext):
 
 @autoriz_router.message(AuthorizationState.waiting_password)
 async def auto_waiting_email(message: Message, state: FSMContext):
-    await state.update_data(password=message.text.lower())
+    await state.update_data(password=change(message.text))
     await message.answer("Пароль принят!")
     data = await state.get_data()
     kb = [
@@ -44,18 +46,23 @@ async def auto_waiting_email(message: Message, state: FSMContext):
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     await message.answer(
-        f"Перепроверьте ваши данные\nemail: {data.get("e_mail")}\npassword: ||{data.get("password")}||\n\nВсе верно?",
-        parse_mode='MarkdownV2', reply_markup=keyboard)
+        f"Перепроверьте ваши данные\nemail: {data.get("e_mail")}\npassword: {data.get("password")}\n\nВсе верно?",
+         reply_markup=keyboard)
     await state.set_state(AuthorizationState.confirm_state)
 
 
 @autoriz_router.callback_query(AuthorizationState.confirm_state, F.data == 'yes_autoriz')
-async def answer(call: CallbackQuery, state: FSMContext,session : AsyncSession):
-    #тут будет осуществляться запрос есть ли такой пользователь или нет
-    database = Database(session)
-    await database.change_authorizion(call)
+async def answer(call: CallbackQuery, state: FSMContext, session: AsyncSession):
+    data = await state.get_data()
+    res = await Auth().login(data.get("e_mail"), data.get("password"))
+    pprint.pprint(res)
+    if type(res) == int:
+        await call.message.answer("Ошибка в логине или в пароле")
+    else:
+        database = Database(session)
+        await database.change_authorizion(call)
+        await call.message.answer("Вы успешно авторизовались!\nДля продолжения прожмите /start")
     await state.clear()
-    await call.message.answer("Вы успешно зарегистрировались!\nДля продолжения прожмите /start")
 
 
 @autoriz_router.callback_query(AuthorizationState.confirm_state, F.data == 'no_autoriz')
