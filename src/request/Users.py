@@ -70,4 +70,16 @@ class Auth:
                     return res.status
                 return res.status
 
-    # @staticmethod
+    @staticmethod
+    async def ldap_login(login: str, password: str):
+        """Вернёт код ошибки или Юзера"""
+        async with aiohttp.ClientSession() as session:
+            with session.post('https://test.vcc.uriit.ru/api/auth/ldap/login', json={
+                "login": login,
+                "password": password,
+                "fingerprint": {}
+            }) as res:
+                if res.status == 200:
+                    return res.json
+                return res.status
+
