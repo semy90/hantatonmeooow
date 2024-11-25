@@ -4,7 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 def not_authorization_keyboard() -> ReplyKeyboardMarkup:
     kb = [
-        [KeyboardButton(text="Авторизоваться")]
+        [KeyboardButton(text="Авторизоваться")],
+        [KeyboardButton(text="Зарегистрироваться")]
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard= True)
     return keyboard

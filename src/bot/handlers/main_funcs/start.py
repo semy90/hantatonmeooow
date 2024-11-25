@@ -31,3 +31,7 @@ async def start_handler(message: Message):
 @start_router.message()
 async def i_dont_understand(message: Message):
     await message.reply("Я вас не понимаю!")
+
+
+
+
