@@ -9,7 +9,6 @@ from aiogram import Bot, Dispatcher
 from bot.handlers import include_routers
 from bot.middlewares import include_middlewares
 from database.session import init_db
-from bot.handlers.admin import include_admin_routers
 
 import config
 
@@ -21,7 +20,6 @@ async def main():
     session_maker = await init_db(settings)
 
     include_middlewares(dp, session_maker)
-    include_admin_routers(dp)
     include_routers(dp)
 
     await bot.delete_webhook(drop_pending_updates=True)

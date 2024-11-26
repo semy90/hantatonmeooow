@@ -24,3 +24,4 @@ class DBSessionMiddleware(BaseMiddleware):
             data['session'] = session
             await data['database'].add_new_user(event)
         return await handler(event, data)
+

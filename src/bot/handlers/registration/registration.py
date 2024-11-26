@@ -9,19 +9,19 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot.filters.is_autorization import NotAuthorizationFilter
 from bot.states.authorization import AuthorizationState
 from bot.states.registration import RegistrationState
 from request.Users import Auth
 from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorization_keyboard
 from src.database.gateway import Database
 from src.database.models.user import UserModel
-from bot.filters.registred import AuthorizationFilter, NotAuthorizationFilter
 from utils.changer import change
 
 reg_router = Router(name=__name__)
 
 
-@reg_router.message(F.text == "Зарегистрироваться")
+@reg_router.message(F.text == "Зарегистрироваться", NotAuthorizationFilter(),StateFilter(None))
 async def reg_handler(message: Message, state: FSMContext):
     await message.answer("Введите логин: ", reply_markup=ReplyKeyboardRemove())
     await state.set_state(RegistrationState.waiting_login)
@@ -108,6 +108,7 @@ async def reg_waiting_confirm(call:CallbackQuery, state: FSMContext):
 
     if res == 201:
         await call.message.answer("Вы успешно зарегистрировались")
+
     else:
         await call.message.answer("Ошибка!")
     await state.clear()
