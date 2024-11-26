@@ -7,13 +7,16 @@ def not_authorization_keyboard() -> ReplyKeyboardMarkup:
         [KeyboardButton(text="Авторизоваться")],
         [KeyboardButton(text="Зарегистрироваться")]
     ]
-    keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard= True)
+    keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     return keyboard
+
 
 def authorization_keyboard() -> InlineKeyboardMarkup:
     kb = [
-        [InlineKeyboardButton(text="Поиск конфиренции", callback_data= 'search_conf'), InlineKeyboardButton(text="Ваш профиль", callback_data="profile")],
-        [InlineKeyboardButton(text="Ваши конфиренции"), InlineKeyboardButton(text="Настройки", callback_data="profile")]
+        [InlineKeyboardButton(text="Поиск конфиренции", callback_data='search_conf'),
+         InlineKeyboardButton(text="Ваш профиль", callback_data="profile")],
+        [InlineKeyboardButton(text="Ваши конфиренции", callback_data="conf"),
+         InlineKeyboardButton(text="Настройки", callback_data="settings")]
     ]
-    keyboard = InlineKeyboardMarkup(keyboard=kb, resize_keyboard= True)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     return keyboard

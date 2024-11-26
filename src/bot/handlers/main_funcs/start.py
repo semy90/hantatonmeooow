@@ -21,7 +21,12 @@ async def start_handler(message: Message):
                          )
 
 
-@start_router.message(CommandStart(), AuthorizationFilter)
+@start_router.message(CommandStart(), AuthorizationFilter())
+async def start_handler(message: Message):
+    await message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
+                         reply_markup=authorization_keyboard()
+                         )
+@start_router.callback_query(F.data == "auto_menu")
 async def start_handler(message: Message):
     await message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
                          reply_markup=authorization_keyboard()

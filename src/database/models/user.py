@@ -9,4 +9,5 @@ class UserModel(AlchemyBaseModel):
 
     id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=False, nullable=True)
-    token : Mapped[str]  = mapped_column(String)
+    token: Mapped[str] = mapped_column(String)
+    userid: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, primary_key=True)
