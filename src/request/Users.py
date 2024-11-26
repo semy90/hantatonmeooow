@@ -1,6 +1,5 @@
 import aiohttp
 import asyncio
-import jwt as pyjwt
 from utils import append_rt, second_req
 
 
