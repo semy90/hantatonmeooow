@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from utils import append_rt, second_req
+from request.utils import append_rt, second_req
 
 
 class Auth:
