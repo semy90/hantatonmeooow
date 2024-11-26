@@ -346,3 +346,35 @@ class Role:
                 if res.status == 401:
                     return await second_req(jwt, url)
                 return res.status
+
+
+class Account:
+    @staticmethod
+    async def info(jwt):
+        url = f'https://test.vcc.uriit.ru/api/account/user-info'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers={'Authorization': f'Bearer {jwt}'}) as res:
+                if res.status == 200:
+                    return await res.json()
+                if res.status == 401:
+                    return await second_req(jwt, url)
+                return res.status
+
+    @staticmethod
+    async def refact_info(jwt):
+        url = f'https://test.vcc.uriit.ru/api/account/user-info'
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json={
+                "password": "string",
+                "firstName": "string",
+                "lastName": "string",
+                "middleName": "string",
+                "email": "user@example.com",
+                "phone": "string",
+                "birthday": "2024-11-26"
+            }) as res:
+                if res.status == 200:
+                    return await res.json()
+                if res.status == 401:
+                    return await second_req(jwt, url)
+                return res.status
