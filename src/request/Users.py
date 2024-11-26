@@ -113,7 +113,7 @@ class Auth:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
     @staticmethod
@@ -289,7 +289,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
     @staticmethod
@@ -302,7 +302,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
     @staticmethod
@@ -322,7 +322,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
     @staticmethod
@@ -344,7 +344,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
 
@@ -357,24 +357,25 @@ class Account:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
 
     @staticmethod
-    async def refact_info(jwt):
+    async def refact_info(jwt, password, firstName, lastName, middleName, email, phone, birthday):
         url = f'https://test.vcc.uriit.ru/api/account/user-info'
+
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json={
-                "password": "string",
-                "firstName": "string",
-                "lastName": "string",
-                "middleName": "string",
-                "email": "user@example.com",
-                "phone": "string",
-                "birthday": "2024-11-26"
+            async with session.post(url, headers={'Authorization': f'Bearer {jwt}'}, json={
+                "password": password,
+                "firstName": firstName,
+                "lastName": lastName,
+                "middleName": middleName,
+                "email": email,
+                "phone": phone,
+                "birthday": birthday
             }) as res:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url)
+                    return await second_req(jwt, url, session)
                 return res.status
