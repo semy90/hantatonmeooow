@@ -43,7 +43,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
     async def login(login, passwd):
@@ -100,7 +100,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
     async def logout():
@@ -108,10 +108,11 @@ class Auth:
         "string"
         """
         async with aiohttp.ClientSession() as session:
-            async with session.post('https://test.vcc.uriit.ru/api/auth/logout') as res:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/logout',
+                                    headers={'Authorization': f'Bearer {jwt}'}) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
     async def refresh_token(ref_tok):
@@ -166,7 +167,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
     async def reset_password(email):
@@ -182,7 +183,7 @@ class Auth:
             async with session.post('https://test.vcc.uriit.ru/api/auth/reset-password', json={
                 "email": email
             }) as res:
-                return  res.status
+                return res.status
 
     @staticmethod
     async def reset_password_confirm(newpasswd, token):
@@ -199,10 +200,10 @@ class Auth:
                 "newPassword": newpasswd,
                 "resetToken": token
             }) as res:
-                return  res.status
+                return res.status
 
     @staticmethod
-    async def ldap_login(login, password):
+    async def ldap_login(login, passwd):
         """Вход с помощью лдап
         {
             "token": "string",
@@ -256,12 +257,12 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
 
 class Role:
     @staticmethod
-    async def role(page=1, rowpage=101, sort='id'):
+    async def role(jwt, page=1, rowpage=101, sort='id'):
         """Возвращает все роли
         {
             "rowsPerPage": 0,
@@ -282,23 +283,25 @@ class Role:
         }"""
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    f'https://test.vcc.uriit.ru/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}') as res:
+                    f'https://test.vcc.uriit.ru/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}',
+                    headers={"Authorization": f"Bearer {jwt}"}) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
-    async def permissions(ends="ends"):
+    async def permissions(jwt, ends="ends"):
         """Возвращает все разрешения
         ["string"]"""
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://test.vcc.uriit.ru/role/permissions?ends={ends}') as res:
+            async with session.get(f'https://test.vcc.uriit.ru/role/permissions?ends={ends}',
+                                   headers={"Authorization": f'Bearer {jwt}'}) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
-    async def get_role(role_id):
+    async def get_role(jwt, role_id):
         """Возвращает роль по id(1, ...)
         {
             "name": "string",
@@ -309,10 +312,11 @@ class Role:
             ]
         }"""
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://test.vcc.uriit.ru/api/role/{role_id}') as res:
+            async with session.get(f'https://test.vcc.uriit.ru/api/role/{role_id}',
+                                   headers={'Authorization': f'Bearer {jwt}'}) as res:
                 if res.status == 200:
                     return await res.json()
-                return  res.status
+                return res.status
 
     @staticmethod
     async def role_permission(role_id, permission):
@@ -325,25 +329,12 @@ class Role:
             ]
         }"""
         async with aiohttp.ClientSession() as session:
-            async with session.put(f'https://test.vcc.uriit.ru/api/role/{role_id}/permissions', json={[
-                permission
-            ]}) as res:
+            async with session.put(f'https://test.vcc.uriit.ru/api/role/{role_id}/permissions',
+                                   headers={'Authorization': f'Bearer {jwt}'},
+                                   json={[
+                                       permission
+                                   ]}) as res:
                 if res.status == 200:
                     return await res.json()
                 return res.status
 
-
-# class Users:
-#     @staticmethod
-
-import requests, pprint
-
-with requests.session() as session:
-    with session.post('https://test.vcc.uriit.ru/api/auth/login', json={
-        "login": 'Hantaton01',
-        "password": 't6vYHnNhBqN1F4(q',
-        "fingerprint": {}
-    }) as res:
-        pprint.pprint(res.json())
-    with session.get('https://test.vcc.uriit.ru/users?page=1&rowsPerPage=25&showDeleted=false') as res:
-        pprint.pprint(res.json())
