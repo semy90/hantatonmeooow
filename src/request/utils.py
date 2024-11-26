@@ -7,7 +7,7 @@ async def update_jwt(jwt, session):
         "token": rt
     }) as res:
         if res.status == 200:
-            jwt = await appent_rt(await res.json())
+            jwt = await append_rt(await res.json())
     return jwt
 
 async def append_rt(jwt):
