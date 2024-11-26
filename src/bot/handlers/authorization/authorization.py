@@ -46,7 +46,7 @@ async def auto_waiting_email(message: Message, state: FSMContext):
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     await message.answer(
-        f"Перепроверьте ваши данные\nemail: {data.get("login")}\npassword: {data.get("password")}\n\nВсе верно?",
+        f"Перепроверьте ваши данные\nlogin: {data.get("login")}\npassword: {data.get("password")}\n\nВсе верно?",
          reply_markup=keyboard)
     await state.set_state(AuthorizationState.confirm_state)
 
@@ -60,7 +60,7 @@ async def answer(call: CallbackQuery, state: FSMContext, session: AsyncSession):
         await call.message.answer("Ошибка в логине или в пароле")
     else:
         database = Database(session)
-        await database.change_token(call, res.get('token'))
+        await database.change_token_with_id(call, res)
         await call.message.answer("Вы успешно авторизовались!\nДля продолжения прожмите /start")
     await state.clear()
 

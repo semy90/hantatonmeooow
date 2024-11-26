@@ -29,10 +29,11 @@ class Database:
         # self.session.add(user)
         await self.session.commit()
 
-    async def change_token_with_id(self, event, new_token: str):
+    async def change_token_with_id(self, event, data : dict):
         query = sa.select(UserModel).where(UserModel.id == event.from_user.id)
         user = await self.session.scalar(query)
-        user.token = new_token
+        user.token = data["token"]
+        user.userid = data["user"]['id']
         # self.session.add(user)
         await self.session.commit()
 
@@ -55,7 +56,8 @@ class Database:
             user = UserModel(
                 id=event.from_user.id,
                 name=event.from_user.username,
-                token=""
+                token="",
+                userid = -1
             )
             self.session.add(user)
 
