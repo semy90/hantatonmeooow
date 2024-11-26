@@ -313,3 +313,24 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 return await res.status
+
+    @staticmethod
+    async def role_permission(role_id, permission):
+        """Get
+        {
+            "name": "string",
+            "description": "string",
+            "id": 0,
+            "permissions": [
+            "string"
+            ]
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.put(f'https://test.vcc.uriit.ru/api/role/{role_id}/permissions', json={[
+                permission
+            ]}) as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+
