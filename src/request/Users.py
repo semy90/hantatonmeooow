@@ -43,7 +43,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def login(login, passwd):
@@ -100,7 +100,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def logout():
@@ -111,7 +111,7 @@ class Auth:
             async with session.post('https://test.vcc.uriit.ru/api/auth/logout') as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def refresh_token(ref_tok):
@@ -166,7 +166,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def reset_password(email):
@@ -182,7 +182,7 @@ class Auth:
             async with session.post('https://test.vcc.uriit.ru/api/auth/reset-password', json={
                 "email": email
             }) as res:
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def reset_password_confirm(newpasswd, token):
@@ -199,7 +199,7 @@ class Auth:
                 "newPassword": newpasswd,
                 "resetToken": token
             }) as res:
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def ldap_login(login, password):
@@ -256,7 +256,7 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
 
 class Role:
@@ -285,7 +285,7 @@ class Role:
                     f'https://test.vcc.uriit.ru/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}') as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def permissions(ends="ends"):
@@ -295,7 +295,7 @@ class Role:
             async with session.get(f'https://test.vcc.uriit.ru/role/permissions?ends={ends}') as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def get_role(role_id):
@@ -312,12 +312,11 @@ class Role:
             async with session.get(f'https://test.vcc.uriit.ru/api/role/{role_id}') as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return  res.status
 
     @staticmethod
     async def role_permission(role_id, permission):
-        """Get
-        {
+        """{
             "name": "string",
             "description": "string",
             "id": 0,
@@ -331,6 +330,20 @@ class Role:
             ]}) as res:
                 if res.status == 200:
                     return await res.json()
-                return await res.status
+                return res.status
 
 
+# class Users:
+#     @staticmethod
+
+import requests, pprint
+
+with requests.session() as session:
+    with session.post('https://test.vcc.uriit.ru/api/auth/login', json={
+        "login": 'Hantaton01',
+        "password": 't6vYHnNhBqN1F4(q',
+        "fingerprint": {}
+    }) as res:
+        pprint.pprint(res.json())
+    with session.get('https://test.vcc.uriit.ru/users?page=1&rowsPerPage=25&showDeleted=false') as res:
+        pprint.pprint(res.json())
