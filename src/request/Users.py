@@ -168,7 +168,7 @@ class Auth:
                 "token": ref_tok
             }) as res:
                 if res.status == 200:
-                    return await appent_rt(await res.json())
+                    return await append_rt(await res.json())
                 return res.status
 
     @staticmethod
