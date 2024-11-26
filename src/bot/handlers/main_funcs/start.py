@@ -14,7 +14,7 @@ start_router = Router(name=__name__)
 
 
 # проверка на незарег пользователя
-@start_router.message(CommandStart(), NotAuthorizationFilter() )
+@start_router.message(CommandStart(), NotAuthorizationFilter())
 async def start_handler(message: Message):
     await message.answer('Приветствую вас в меню бота!\nДля продолжения работы в системе, пройдите авторизацию',
                          reply_markup=not_authorization_keyboard()
@@ -26,17 +26,15 @@ async def start_handler(message: Message):
     await message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
                          reply_markup=authorization_keyboard()
                          )
+
+
 @start_router.callback_query(F.data == "auto_menu")
-async def start_handler(message: Message):
-    await message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
-                         reply_markup=authorization_keyboard()
-                         )
+async def start_handler(query: CallbackQuery):
+    await query.message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
+                               reply_markup=authorization_keyboard()
+                               )
 
 
 @start_router.message()
 async def i_dont_understand(message: Message):
     await message.reply("Я вас не понимаю!")
-
-
-
-
