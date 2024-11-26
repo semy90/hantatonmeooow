@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 import jwt as pyjwt
-from utils import update_jwt, append_rt, second_req
+from utils import append_rt, second_req
 
 
 class Auth:

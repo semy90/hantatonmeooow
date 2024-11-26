@@ -1,10 +1,14 @@
 import jwt as pyjwt
-
-from Users import Auth
+import aiohttp
 
 async def update_jwt(jwt):
     rt = (await pyjwt.decode(jwt, 'secret', algorithms=['HS256']))['refresh_token']
-    jwt = (await Auth.refresh_token(rt))['token']
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://test.vcc.uriit.ru/api/auth/refresh-token', json={
+            "token": rt
+        }) as res:
+            if res.status == 200:
+                jwt = await appent_rt(await res.json())
     return jwt
 
 async def append_rt(jwt):
