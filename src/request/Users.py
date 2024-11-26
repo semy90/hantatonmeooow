@@ -1,12 +1,33 @@
 import aiohttp
 import asyncio
 
+from sqlalchemy.sql.operators import endswith_op
+
 
 class Auth:
     @staticmethod
     async def register(login, password, email, lastname, firstname, middlename, phone, birthday, roleid=5,
                        typeusr="native"):
-        """return STATUS"""
+        """return STATUS ||
+        {
+          "id": 0,
+          "login": "string",
+          "lastName": "string",
+          "firstName": "string",
+          "middleName": "string",
+          "departmentId": 0,
+          "post": "string",
+          "email": "user@example.com",
+          "priority": 3,
+          "roleIds": [
+            0
+          ],
+          "isActive": true,
+          "phone": "string",
+          "birthday": "2024-11-26",
+          "createdAt": "2024-11-26T11:46:06.215Z",
+          "deletedAt": "2024-11-26T11:46:06.215Z"
+        }"""
         async with aiohttp.ClientSession() as session:
             async with session.post('https://test.vcc.uriit.ru/api/auth/register', json={
                 "login": login,
@@ -20,11 +41,57 @@ class Auth:
                 "roleId": roleid,
                 "type": typeusr
             }) as res:
-                return res.status
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
 
     @staticmethod
     async def login(login, passwd):
-        """return DICT_INFO_USER or STATUS"""
+        """return DICT_INFO_USER or STATUS
+        {
+            "token": "string",
+            "user": {
+            "id": 0,
+            "departmentId": 0,
+            "post": "string",
+            "permissions": [
+              "string"
+            ],
+            "login": "string",
+            "email": "user@example.com",
+            "lastName": "string",
+            "firstName": "string",
+            "middleName": "string",
+            "birthday": "2024-11-26",
+            "phone": "string",
+            "updatedAt": "2024-11-26T11:48:02.471Z",
+            "priority": 0,
+            "roles": [
+              {
+                "name": "string",
+                "description": "string",
+                "id": 0,
+                "permissions": [
+                  "string"
+                ]
+              }
+            ],
+            "department": {
+              "name": "Очень важный департамент",
+              "shortName": "string",
+              "address": "string",
+              "email": "user@example.com",
+              "parentId": 0,
+              "id": 0,
+              "ldapName": "string"
+            }
+            },
+            "tutorials_progress": {
+            "additionalProp1": "2024-11-26T11:48:02.471Z",
+            "additionalProp2": "2024-11-26T11:48:02.471Z",
+            "additionalProp3": "2024-11-26T11:48:02.471Z"
+            }
+        }"""
         async with aiohttp.ClientSession() as session:
             async with session.post('https://test.vcc.uriit.ru/api/auth/login', json={
                 "login": login,
@@ -33,4 +100,237 @@ class Auth:
             }) as res:
                 if res.status == 200:
                     return await res.json()
-                return res.status
+                return await res.status
+
+    @staticmethod
+    async def logout():
+        """Log out| return string
+        "string"
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/logout') as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+    @staticmethod
+    async def refresh_token(ref_tok):
+        """Обновляем JWT с помощью REF токена
+        {
+            "token": "string",
+            "user": {
+            "id": 0,
+            "departmentId": 0,
+            "post": "string",
+            "permissions": [
+              "string"
+            ],
+            "login": "string",
+            "email": "user@example.com",
+            "lastName": "string",
+            "firstName": "string",
+            "middleName": "string",
+            "birthday": "2024-11-26",
+            "phone": "string",
+            "updatedAt": "2024-11-26T11:49:50.638Z",
+            "priority": 0,
+            "roles": [
+              {
+                "name": "string",
+                "description": "string",
+                "id": 0,
+                "permissions": [
+                  "string"
+                ]
+              }
+            ],
+            "department": {
+              "name": "Очень важный департамент",
+              "shortName": "string",
+              "address": "string",
+              "email": "user@example.com",
+              "parentId": 0,
+              "id": 0,
+              "ldapName": "string"
+            }
+            },
+            "tutorials_progress": {
+            "additionalProp1": "2024-11-26T11:49:50.638Z",
+            "additionalProp2": "2024-11-26T11:49:50.638Z",
+            "additionalProp3": "2024-11-26T11:49:50.638Z"
+            }
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/refresh-token', json={
+                "token": ref_tok
+            }) as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+    @staticmethod
+    async def reset_password(email):
+        """Отправляет письмо на почту
+        {
+            "status": "ok",
+            "warning": "string",
+            "warning_info": [
+            {}
+            ]
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/reset-password', json={
+                "email": email
+            }) as res:
+                return await res.status
+
+    @staticmethod
+    async def reset_password_confirm(newpasswd, token):
+        """Подтверждение сброса
+        {
+            "status": "ok",
+            "warning": "string",
+            "warning_info": [
+            {}
+            ]
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/reset-password-confirm', json={
+                "newPassword": newpasswd,
+                "resetToken": token
+            }) as res:
+                return await res.status
+
+    @staticmethod
+    async def ldap_login(login, password):
+        """Вход с помощью лдап
+        {
+            "token": "string",
+            "user": {
+            "id": 0,
+            "departmentId": 0,
+            "post": "string",
+            "permissions": [
+              "string"
+            ],
+            "login": "string",
+            "email": "user@example.com",
+            "lastName": "string",
+            "firstName": "string",
+            "middleName": "string",
+            "birthday": "2024-11-26",
+            "phone": "string",
+            "updatedAt": "2024-11-26T11:58:56.446Z",
+            "priority": 0,
+            "roles": [
+              {
+                "name": "string",
+                "description": "string",
+                "id": 0,
+                "permissions": [
+                  "string"
+                ]
+              }
+            ],
+            "department": {
+              "name": "Очень важный департамент",
+              "shortName": "string",
+              "address": "string",
+              "email": "user@example.com",
+              "parentId": 0,
+              "id": 0,
+              "ldapName": "string"
+            }
+            },
+            "tutorials_progress": {
+            "additionalProp1": "2024-11-26T11:58:56.446Z",
+            "additionalProp2": "2024-11-26T11:58:56.446Z",
+            "additionalProp3": "2024-11-26T11:58:56.446Z"
+            }
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://test.vcc.uriit.ru/api/auth/ldap/login', json={
+                "login": login,
+                "password": passwd,
+                "fingerprint": {}
+            }) as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+
+class Role:
+    @staticmethod
+    async def role(page=1, rowpage=101, sort='id'):
+        """Возвращает все роли
+        {
+            "rowsPerPage": 0,
+            "page": 0,
+            "rowsNumber": 0,
+            "showDeleted": false,
+            "data": [
+            {
+              "name": "string",
+              "description": "string",
+              "id": 0,
+              "permissions": [
+                "string"
+              ]
+            }
+            ],
+            "sortBy": "id"
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://test.vcc.uriit.ru/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}') as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+    @staticmethod
+    async def permissions(ends="ends"):
+        """Возвращает все разрешения
+        ["string"]"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://test.vcc.uriit.ru/role/permissions?ends={ends}') as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+    @staticmethod
+    async def get_role(role_id):
+        """Возвращает роль по id(1, ...)
+        {
+            "name": "string",
+            "description": "string",
+            "id": 0,
+            "permissions": [
+            "string"
+            ]
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://test.vcc.uriit.ru/api/role/{role_id}') as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+    @staticmethod
+    async def role_permission(role_id, permission):
+        """Get
+        {
+            "name": "string",
+            "description": "string",
+            "id": 0,
+            "permissions": [
+            "string"
+            ]
+        }"""
+        async with aiohttp.ClientSession() as session:
+            async with session.put(f'https://test.vcc.uriit.ru/api/role/{role_id}/permissions', json={[
+                permission
+            ]}) as res:
+                if res.status == 200:
+                    return await res.json()
+                return await res.status
+
+
