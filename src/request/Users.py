@@ -4,10 +4,11 @@ import asyncio
 
 class Auth:
     @staticmethod
-    async def register(login, password, email, lastname, firstname, middlename, phone, birthday, releid, typeusr):
+    async def register(login, password, email, lastname, firstname, middlename, phone, birthday, roleid=5,
+                       typeusr="native"):
         """return STATUS"""
         async with aiohttp.ClientSession() as session:
-            async with session.post('https://test.vcc.uriit.ru/auth/register', json={
+            async with session.post('https://test.vcc.uriit.ru/api/auth/register', json={
                 "login": login,
                 "password": password,
                 "email": email,
@@ -16,7 +17,7 @@ class Auth:
                 "middleName": middlename,
                 "phone": phone,
                 "birthday": birthday,
-                "roleId": releid,
+                "roleId": roleid,
                 "type": typeusr
             }) as res:
                 return res.status
@@ -25,11 +26,11 @@ class Auth:
     async def login(login, passwd):
         """return DICT_INFO_USER or STATUS"""
         async with aiohttp.ClientSession() as session:
-            async with session.post('https://test.vcc.uriit.ru/auth/login', json={
+            async with session.post('https://test.vcc.uriit.ru/api/auth/login', json={
                 "login": login,
                 "password": passwd,
                 "fingerprint": {}
             }) as res:
                 if res.status == 200:
-                    return res.json()
+                    return await res.json()
                 return res.status
