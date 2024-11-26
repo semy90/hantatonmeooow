@@ -20,4 +20,12 @@ settings_router = Router(name=__name__)
 
 @settings_router.callback_query(F.data == "settings")
 async def settings_user(query: CallbackQuery, session: AsyncSession):
-    pass
+    kb = [
+        [InlineKeyboardButton(text="...", callback_data='None'),
+         InlineKeyboardButton(text="Сменить пароль", callback_data='None')],
+        [InlineKeyboardButton(text="Выйти из аккаунта", callback_data="None")],
+        [InlineKeyboardButton(text="Назад", callback_data="auto_menu")]
+
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
+    await query.message.edit_text("Настройки аккаунта:", reply_markup=keyboard)
