@@ -284,7 +284,7 @@ class Role:
             ],
             "sortBy": "id"
         }"""
-        url = f'https://test.vcc.uriit.ru/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}'
+        url = f'https://test.vcc.uriit.ru/api/role?page={page}&rowsPerPage={rowpage}&sort_by={sort}'
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers={"Authorization": f"Bearer {jwt}"}) as res:
                 if res.status == 200:
@@ -297,7 +297,7 @@ class Role:
     async def permissions(jwt, ends="ends"):
         """Возвращает все разрешения
         ["string"]"""
-        url = f'https://test.vcc.uriit.ru/role/permissions?ends={ends}'
+        url = f'https://test.vcc.uriit.ru/api/role/permissions?ends={ends}'
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers={"Authorization": f'Bearer {jwt}'}) as res:
                 if res.status == 200:

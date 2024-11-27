@@ -1,5 +1,7 @@
 import jwt as pyjwt
 import aiohttp
+import base64
+import json
 
 async def update_jwt(jwt, session):
     rt = (await pyjwt.decode(jwt, 'secret', algorithms=['HS256']))['refresh_token']
@@ -11,7 +13,12 @@ async def update_jwt(jwt, session):
     return jwt
 
 async def append_rt(jwt):
-    jwt['refresh_token'] = (await pyjwt.decode(jwt['token'], "secret", algorithms=["HS256"]))['refresh_token']
+    rt = jwt['token'].split('.')[1]
+    rt = rt.encode('utf-8')
+    rt = base64.b64decode(rt + b'=' * (-len(rt) % 4))
+    rt = rt.decode('utf-8')
+    rt = json.loads(rt)
+    jwt['refresh_token'] = rt['refresh_token']
     return jwt
 
 async def second_req(jwt, url, session, json):
