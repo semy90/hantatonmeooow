@@ -410,7 +410,7 @@ class Meetings:
                 if res.status == 200:
                     return (await res.json())['data']
                 if res.status == 401:
-                    return await second_req(jwt, url, session, json)
+                    return await second_req(jwt, url, session,{})
                 return res.status
 
     @staticmethod
@@ -419,7 +419,7 @@ class Meetings:
                               cisco_needVideoRecording: bool, vinteo_needVideoRecording: bool, externalUrl,
                               permanentRoomId, startedAt, endedAt, duration: int, isGovernorPresents: bool,
                               isNotifyAccepted: bool, par_id: int, email, lastName, firstName, middleName,
-                              frequency: int, gr_id: int, rec_startedAt, interval: int, until, weekDays,
+                              frequency: int, gr_id: int, rec_startedAt, interval: int, count, until, weekDays,
                               additionalDates, excludeDates, recurrenceUpdateType, isVirtual:bool, state, backend, or_id:int, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {'force': force}
