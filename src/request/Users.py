@@ -364,11 +364,17 @@ class Account:
                 return res.status
 
     @staticmethod
-    async def refact_info(jwt, password, first_name=None, last_name=None, middle_name=None, email=None, phone=None,
+    async def refact_info(jwt, first_name=None, last_name=None, middle_name=None, email=None, phone=None,
                           birthday=None):
         url = f'https://test.vcc.uriit.ru/api/account/user-info'
         async with aiohttp.ClientSession() as session:
-            data_us = await pyjwt.decode(jwt, 'secret', algorithms=['HS256'])
+            import json
+            data_us = jwt.split('.')[1]
+            data_us = data_us.encode('utf-8')
+            data_us = base64.b64decode(data_us + b'=' * (-len(rt) % 4))
+            data_us = data_us.decode('utf-8')
+            data_us = json.loads(data_us)
+
             first_name = first_name or data_us['first_name']
             last_name = last_name or data_us['last_name']
             middle_name = middle_name or data_us['middle_name']
@@ -376,7 +382,6 @@ class Account:
             phone = phone or data_us['phone']
             birthday = birthday or data_us['birthday']
             json = {
-                "password": password,
                 "firstName": first_name,
                 "lastName": last_name,
                 "middleName": middle_name,
