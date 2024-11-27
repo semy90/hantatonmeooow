@@ -391,9 +391,10 @@ class Account:
                     return await second_req(jwt, url, session, json)
                 return res.status
 
+
 class Meetings:
     @staticmethod
-    async def  meetings(jwt, fromDatetime, toDatetime, buildingId, roomId, page=1, sort_by='id', state='booked'):
+    async def meetings(jwt, fromDatetime, toDatetime, buildingId, roomId, page=1, sort_by='id', state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
@@ -408,23 +409,91 @@ class Meetings:
             async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
                 if res.status == 200:
                     return (await res.json())['data']
+                if res.status == 401:
+                    return await second_req(jwt, url, session, json)
                 return res.status
-    #
-    # @staticmethod
-    # async def
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @staticmethod
+    async def greate_meetings(jwt, attachments, name, roomid: int, comment, participantsCount: int, sendNotificationsAt,
+                              isMicrophoneOn: bool, isVideoOn: bool, isWaitingRoomEnabled: bool,
+                              cisco_needVideoRecording: bool, vinteo_needVideoRecording: bool, externalUrl,
+                              permanentRoomId, startedAt, endedAt, duration: int, isGovernorPresents: bool,
+                              isNotifyAccepted: bool, par_id: int, email, lastName, firstName, middleName,
+                              frequency: int, gr_id: int, rec_startedAt, interval: int, until, weekDays,
+                              additionalDates, excludeDates, recurrenceUpdateType, isVirtual:bool, state, backend, or_id:int, force=True):
+        url = f'https://test.vcc.uriit.ru/api/meetings'
+        params = {'force': force}
+        json = {
+            "attachments": [
+                attachments
+            ],
+            "name": name,
+            "roomId": roomid,
+            "comment": comment,
+            "participantsCount": participantsCount,
+            "sendNotificationsAt": sendNotificationsAt,
+            "ciscoSettings": {
+                "isMicrophoneOn": isMicrophoneOn,
+                "isVideoOn": isVideoOn,
+                "isWaitingRoomEnabled": isWaitingRoomEnabled,
+                "needVideoRecording": cisco_needVideoRecording
+            },
+            "vinteoSettings": {
+                "needVideoRecording": vinteo_needVideoRecording
+            },
+            "externalSettings": {
+                "externalUrl": externalUrl,
+                "permanentRoomId": permanentRoomId
+            },
+            "startedAt": startedAt,
+            "endedAt": endedAt,
+            "duration": duration,
+            "isGovernorPresents": isGovernorPresents,
+            "isNotifyAccepted": isNotifyAccepted,
+            "participants": [
+                {
+                    "id": par_id
+                },
+                {
+                    "email": email,
+                    "lastName": lastName,
+                    "firstName": firstName,
+                    "middleName": middleName
+                }
+            ],
+            "groups": [
+                {
+                    "id": gr_id
+                }
+            ],
+            "recurrence": {
+                "frequency": frequency,
+                "startedAt": rec_startedAt,
+                "interval": interval,
+                "count": count,
+                "until": until,
+                "weekDays": [
+                    weekDays
+                ],
+                "additionalDates": [
+                    additionalDates
+                ],
+                "excludeDates": [
+                    excludeDates
+                ]
+            },
+            "recurrenceUpdateType": recurrenceUpdateType,
+            "isVirtual": isVirtual,
+            "state": state,
+            "backend": backend,
+            "organizedBy": {
+                "id": or_id
+            }
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, params=params, json=json, headers={'Authorization': f'Bearer {jwt}'}) as res:
+                if res.status == 201:
+                    return await res.json()
+                if res.status == 401:
+                    return await second_req(jwt, url, session, json)
+                return res.status
