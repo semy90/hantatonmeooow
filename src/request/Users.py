@@ -371,7 +371,7 @@ class Account:
             import json
             data_us = jwt.split('.')[1]
             data_us = data_us.encode('utf-8')
-            data_us = base64.b64decode(data_us + b'=' * (-len(rt) % 4))
+            data_us = base64.b64decode(data_us + b'=' * (-len(data_us) % 4))
             data_us = data_us.decode('utf-8')
             data_us = json.loads(data_us)
 
