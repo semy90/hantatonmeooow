@@ -80,7 +80,7 @@ async def reg_waiting_middlename(message: Message, state: FSMContext):
 async def reg_waiting_phone(message: Message, state: FSMContext):
     await state.update_data(phone=change(message.text))
 
-    await message.answer("Отлично, теперь пришлите вашу дату рождение в формате <ДД.ММ.ГГГГ>")
+    await message.answer("Отлично, теперь пришлите вашу дату рождение в формате <ДД-ММ-ГГГГ>")
     await state.set_state(RegistrationState.waiting_bithday)
 
 

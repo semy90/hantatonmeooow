@@ -1,3 +1,5 @@
+import base64
+
 import aiohttp
 import asyncio
 import jwt as pyjwt
