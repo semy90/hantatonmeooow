@@ -429,6 +429,7 @@ class Meetings:
                         return data
                     if res.status != 200:
                         return res.status
+                    params['page'] = params['page'] + 1
 
 
     @staticmethod
