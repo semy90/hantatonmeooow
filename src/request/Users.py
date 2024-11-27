@@ -401,7 +401,7 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id',
+    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
                        state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
@@ -409,19 +409,27 @@ class Meetings:
             'toDatetime': toDatetime,
             'page': page,
             'sort_by': sort_by,
+            'rowsPerPage': rowsPerPage,
             'state': state
         }
         if buildingId:
             params['buildingId'] = buildingId
         if roomId:
             params['roomId'] = roomId
+        data = list()
+
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
-                if res.status == 200:
-                    return (await res.json())['data']
-                if res.status == 401:
-                    return await second_req(jwt, url, session, {})
-                return res.status
+            while True:
+                async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
+                    if res.status == 200:
+                        var = data.append(await res.json())['data']
+                    if res.status == 401:
+                        var = data.append((await second_req(jwt, url, session, {}))['data'])
+                    if res.status != 200 and data:
+                        return data
+                    if res.status != 200:
+                        return res.status
+
 
     @staticmethod
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
