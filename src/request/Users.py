@@ -399,7 +399,7 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, buildingId, roomId, page=1, sort_by='id', state='booked'):
+    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id', state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
@@ -415,17 +415,18 @@ class Meetings:
                 if res.status == 200:
                     return (await res.json())['data']
                 if res.status == 401:
-                    return await second_req(jwt, url, session,{})
+                    return await second_req(jwt, url, session, {})
                 return res.status
 
     @staticmethod
-    async def greate_meetings(jwt, attachments, name, roomid: int, comment, participantsCount: int, sendNotificationsAt,
+    async def create_meetings(jwt, attachments, name, roomid: int, comment, participantsCount: int, sendNotificationsAt,
                               isMicrophoneOn: bool, isVideoOn: bool, isWaitingRoomEnabled: bool,
                               cisco_needVideoRecording: bool, vinteo_needVideoRecording: bool, externalUrl,
                               permanentRoomId, startedAt, endedAt, duration: int, isGovernorPresents: bool,
                               isNotifyAccepted: bool, par_id: int, email, lastName, firstName, middleName,
                               frequency: int, gr_id: int, rec_startedAt, interval: int, count, until, weekDays,
-                              additionalDates, excludeDates, recurrenceUpdateType, isVirtual:bool, state, backend, or_id:int, force=True):
+                              additionalDates, excludeDates, recurrenceUpdateType, isVirtual: bool, state, backend,
+                              or_id: int, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {'force': force}
         json = {
