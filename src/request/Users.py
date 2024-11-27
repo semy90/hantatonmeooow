@@ -390,3 +390,41 @@ class Account:
                 if res.status == 401:
                     return await second_req(jwt, url, session, json)
                 return res.status
+
+class Meetings:
+    @staticmethod
+    async def  meetings(jwt, fromDatetime, toDatetime, buildingId, roomId, page=1, sort_by='id', state='booked'):
+        url = f'https://test.vcc.uriit.ru/api/meetings'
+        params = {
+            'fromDatetime': fromDatetime,
+            'toDatetime': toDatetime,
+            'buildingId': buildingId,
+            'roomId': roomId,
+            'page': page,
+            'sort_by': sort_by,
+            'state': state
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
+                if res.status == 200:
+                    return (await res.json())['data']
+                return res.status
+    #
+    # @staticmethod
+    # async def
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
