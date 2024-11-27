@@ -401,7 +401,8 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id', state='booked'):
+    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id',
+                       state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
@@ -421,82 +422,23 @@ class Meetings:
                 return res.status
 
     @staticmethod
-    async def create_meetings(jwt, attachments, name, roomid: int, comment, participantsCount: int, sendNotificationsAt,
-                              isMicrophoneOn: bool, isVideoOn: bool, isWaitingRoomEnabled: bool,
-                              cisco_needVideoRecording: bool, vinteo_needVideoRecording: bool, externalUrl,
-                              permanentRoomId, startedAt, endedAt, duration: int, isGovernorPresents: bool,
-                              isNotifyAccepted: bool, par_id: int, email, lastName, firstName, middleName,
-                              frequency: int, gr_id: int, rec_startedAt, interval: int, count, until, weekDays,
-                              additionalDates, excludeDates, recurrenceUpdateType, isVirtual: bool, state, backend,
-                              or_id: int, force=True):
+    async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
+                              durationx, participants:list, sendNotificationsAt, state, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {'force': force}
         json = {
-            "attachments": [
-                attachments
-            ],
             "name": name,
-            "roomId": roomid,
-            "comment": comment,
-            "participantsCount": participantsCount,
-            "sendNotificationsAt": sendNotificationsAt,
             "ciscoSettings": {
                 "isMicrophoneOn": isMicrophoneOn,
                 "isVideoOn": isVideoOn,
-                "isWaitingRoomEnabled": isWaitingRoomEnabled,
-                "needVideoRecording": cisco_needVideoRecording
+                "isWaitingRoomEnabled": isWaitingRoomEnabled
             },
-            "vinteoSettings": {
-                "needVideoRecording": vinteo_needVideoRecording
-            },
-            "externalSettings": {
-                "externalUrl": externalUrl,
-                "permanentRoomId": permanentRoomId
-            },
+            "participantsCount": participantsCount,
             "startedAt": startedAt,
-            "endedAt": endedAt,
-            "duration": duration,
-            "isGovernorPresents": isGovernorPresents,
-            "isNotifyAccepted": isNotifyAccepted,
-            "participants": [
-                {
-                    "id": par_id
-                },
-                {
-                    "email": email,
-                    "lastName": lastName,
-                    "firstName": firstName,
-                    "middleName": middleName
-                }
-            ],
-            "groups": [
-                {
-                    "id": gr_id
-                }
-            ],
-            "recurrence": {
-                "frequency": frequency,
-                "startedAt": rec_startedAt,
-                "interval": interval,
-                "count": count,
-                "until": until,
-                "weekDays": [
-                    weekDays
-                ],
-                "additionalDates": [
-                    additionalDates
-                ],
-                "excludeDates": [
-                    excludeDates
-                ]
-            },
-            "recurrenceUpdateType": recurrenceUpdateType,
-            "isVirtual": isVirtual,
-            "state": state,
-            "backend": backend,
-            "organizedBy": {
-                "id": or_id
-            }
+            "duration": durationx,
+            "participants": participants,
+            "sendNotificationsAt": sendNotificationsAt,
+            "state": state
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(url, params=params, json=json, headers={'Authorization': f'Bearer {jwt}'}) as res:
