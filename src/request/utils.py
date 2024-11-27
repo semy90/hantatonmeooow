@@ -14,9 +14,9 @@ async def append_rt(jwt):
     jwt['refresh_token'] = (await pyjwt.decode(jwt['token'], "secret", algorithms=["HS256"]))['refresh_token']
     return jwt
 
-async def second_req(jwt, url, session):
+async def second_req(jwt, url, session, json):
     jwt = await update_jwt(jwt, session)
-    async with session.post(url, headers={'Authorization': f'Bearer {jwt}'}) as res:
+    async with session.post(url, headers={'Authorization': f'Bearer {jwt}'}, json=json) as res:
         if res.status == 200:
             return await res.json()
         return res.status

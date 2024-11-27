@@ -1,5 +1,7 @@
 import aiohttp
 import asyncio
+import jwt as pyjwt
+
 from request.utils import append_rt, second_req
 
 
@@ -112,7 +114,7 @@ class Auth:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, {})
                 return res.status
 
     @staticmethod
@@ -288,7 +290,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, {})
                 return res.status
 
     @staticmethod
@@ -301,7 +303,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, {})
                 return res.status
 
     @staticmethod
@@ -321,7 +323,7 @@ class Role:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, {})
                 return res.status
 
     @staticmethod
@@ -336,14 +338,15 @@ class Role:
         }"""
         url = f'https://test.vcc.uriit.ru/api/role/{role_id}/permissions'
         async with aiohttp.ClientSession() as session:
+            json = {[
+                permission
+            ]}
             async with session.put(url, headers={'Authorization': f'Bearer {jwt}'},
-                                   json={[
-                                       permission
-                                   ]}) as res:
+                                   json=json) as res:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, json)
                 return res.status
 
 
@@ -352,29 +355,38 @@ class Account:
     async def info(jwt):
         url = f'https://test.vcc.uriit.ru/api/account/user-info'
         async with aiohttp.ClientSession() as session:
+            json = {}
             async with session.get(url, headers={'Authorization': f'Bearer {jwt}'}) as res:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, json)
                 return res.status
 
     @staticmethod
-    async def refact_info(jwt, password, firstName, lastName, middleName, email, phone, birthday):
+    async def refact_info(jwt, password, first_name=None, last_name=None, middle_name=None, email=None, phone=None,
+                          birthday=None):
         url = f'https://test.vcc.uriit.ru/api/account/user-info'
-
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers={'Authorization': f'Bearer {jwt}'}, json={
+            data_us = await pyjwt.decode(jwt, 'secret', algorithms=['HS256'])
+            first_name = first_name or data_us['first_name']
+            last_name = last_name or data_us['last_name']
+            middle_name = middle_name or data_us['middle_name']
+            email = email or data_us['email']
+            phone = phone or data_us['phone']
+            birthday = birthday or data_us['birthday']
+            json = {
                 "password": password,
-                "firstName": firstName,
-                "lastName": lastName,
-                "middleName": middleName,
+                "firstName": first_name,
+                "lastName": last_name,
+                "middleName": middle_name,
                 "email": email,
                 "phone": phone,
                 "birthday": birthday
-            }) as res:
+            }
+            async with session.post(url, headers={'Authorization': f'Bearer {jwt}'}, json=json) as res:
                 if res.status == 200:
                     return await res.json()
                 if res.status == 401:
-                    return await second_req(jwt, url, session)
+                    return await second_req(jwt, url, session, json)
                 return res.status
