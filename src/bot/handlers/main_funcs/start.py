@@ -30,7 +30,7 @@ async def start_handler(message: Message):
 
 @start_router.callback_query(F.data == "auto_menu")
 async def start_handler(query: CallbackQuery):
-    await query.message.answer('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
+    await query.message.edit_text('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
                                reply_markup=authorization_keyboard()
                                )
 

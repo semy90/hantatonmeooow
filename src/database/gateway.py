@@ -24,7 +24,7 @@ class Database:
         self.session = session
 
     async def get_user(self, event: TelegramObject):
-        query = sa.select(UserModel).where(UserModel.token == old_token)
+        query = sa.select(UserModel).where(UserModel.id == event.from_user.id   )
         user = await self.session.scalar(query)
         tmp_dict = {
             'id': user.id,

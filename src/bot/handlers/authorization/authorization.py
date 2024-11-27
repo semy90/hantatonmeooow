@@ -47,7 +47,7 @@ async def auto_waiting_email(message: Message, state: FSMContext):
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     await message.answer(
         f"Перепроверьте ваши данные\nlogin: {data.get("login")}\npassword: {data.get("password")}\n\nВсе верно?",
-         reply_markup=keyboard)
+        reply_markup=keyboard)
     await state.set_state(AuthorizationState.confirm_state)
 
 

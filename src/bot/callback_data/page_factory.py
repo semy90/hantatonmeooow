@@ -6,3 +6,6 @@ class AllCallbackData(CallbackData, prefix='to'):
 
 class YourCallbackData(CallbackData, prefix='yours_to'):
     page: int
+
+class SearchCallbackData(CallbackData, prefix='yours_to'):
+    page: int
