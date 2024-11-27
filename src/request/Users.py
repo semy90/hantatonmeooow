@@ -407,12 +407,14 @@ class Meetings:
         params = {
             'fromDatetime': fromDatetime,
             'toDatetime': toDatetime,
-            'buildingId': buildingId,
-            'roomId': roomId,
             'page': page,
             'sort_by': sort_by,
             'state': state
         }
+        if buildingId:
+            params['buildingId'] = buildingId
+        if roomId:
+            params['roomId'] = roomId
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
                 if res.status == 200:
