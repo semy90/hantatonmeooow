@@ -6,7 +6,7 @@ import aiohttp
 import asyncio
 import jwt as pyjwt
 
-from request.utils import append_rt, second_req
+from request.utils import append_rt, second_req, jwttort
 
 
 class Auth:
@@ -403,13 +403,14 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
+    async def meetings(jwt, fromDatetime, toDatetime, userId=None, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
                        state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
             'toDatetime': toDatetime,
             'page': page,
+            'userId':userId,
             'sort_by': sort_by,
             'rowsPerPage': rowsPerPage,
             'state': state
@@ -431,6 +432,7 @@ class Meetings:
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
                               durationx, participants:list, sendNotificationsAt, state, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
+        id_org = (await jwttort(jwt))['user']["id"]
         params = {'force': force}
         json = {
             "name": name,
@@ -444,6 +446,7 @@ class Meetings:
             "duration": durationx,
             "participants": participants,
             "sendNotificationsAt": sendNotificationsAt,
+            "organizedBy": {"id": id_org},
             "state": state
         }
         async with aiohttp.ClientSession() as session:
