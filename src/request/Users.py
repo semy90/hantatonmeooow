@@ -414,28 +414,19 @@ class Meetings:
             'rowsPerPage': rowsPerPage,
             'state': state
         }
-        if buildingId:
+        if not buildingId is None:
             params['buildingId'] = buildingId
-        if roomId:
+        if not roomId is None:
             params['roomId'] = roomId
-        data = list()
-        new = None
         while True:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
                     if res.status == 200:
-                        new = (await res.json())['data']
+                        return (await res.json())['data']
                     if res.status == 401:
-                        new = (await second_req(jwt, url, session, {}))['data']
+                        return (await second_req(jwt, url, session, {}))['data']
                     if res.status not in [200, 401]:
                         return res.status
-                    if new[0]['permalinkId']:
-                        data += new
-                        params['page'] = params['page'] + 1
-                        continue
-                    else:
-                        return data
-
     @staticmethod
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
                               durationx, participants:list, sendNotificationsAt, state, force=True):
