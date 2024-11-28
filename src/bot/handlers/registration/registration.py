@@ -23,6 +23,7 @@ reg_router = Router(name=__name__)
 
 @reg_router.message(F.text == "Зарегистрироваться", NotAuthorizationFilter(),StateFilter(None))
 async def reg_handler(message: Message, state: FSMContext):
+
     await message.answer("Введите логин: ", reply_markup=ReplyKeyboardRemove())
     await state.set_state(RegistrationState.waiting_login)
 
@@ -80,7 +81,7 @@ async def reg_waiting_middlename(message: Message, state: FSMContext):
 async def reg_waiting_phone(message: Message, state: FSMContext):
     await state.update_data(phone=change(message.text))
 
-    await message.answer("Отлично, теперь пришлите вашу дату рождение в формате <ДД-ММ-ГГГГ>")
+    await message.answer("Отлично, теперь пришлите вашу дату рождение в формате <ГГГГ-ММ-ДД>")
     await state.set_state(RegistrationState.waiting_bithday)
 
 
@@ -105,7 +106,7 @@ async def reg_waiting_birthday(message: Message, state: FSMContext):
 async def reg_waiting_confirm(call:CallbackQuery, state: FSMContext):
     data = await state.get_data()
     res = await Auth().register(data.get("login"), data.get("password"),data.get("email"),data.get("lastname"), data.get("firstname"), data.get("middlename"), data.get("phone"), data.get("birthday"))
-
+    print(res)
     if res == 201:
         await call.message.answer("Вы успешно зарегистрировались")
 
