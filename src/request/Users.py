@@ -453,3 +453,39 @@ class Meetings:
                 if res.status == 401:
                     return await second_req(jwt, url, session, json)
                 return res.status
+
+    @staticmethod
+    async def current_meetings(jwt, meetingId):
+        url = f'https://test.vcc.uriit.ru/api/meetings/{meetingId}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as res:
+                if res.status == 200:
+                    return await res.json()
+                if res.status == 401:
+                    return await second_req(jwt, url, session, {})
+                return res.status
+
+
+class Departments:
+    @staticmethod
+    async def current_department(jwt, departmentId):
+        url = f'https://test.vcc.uriit.ru/api/departments/{departmentId}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as res:
+                if res.status == 200:
+                    return await res.json()
+                if res.status == 401:
+                    return await second_req(jwt, url, session, {})
+                return res.status
+
+
+
+
+
+
+
+
+
+
+
+
