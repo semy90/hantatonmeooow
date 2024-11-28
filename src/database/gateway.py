@@ -23,6 +23,12 @@ class Database:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def delete_user(self,event:TelegramObject):
+        query = sa.select(UserModel).where(UserModel.id == event.from_user.id)
+        user = await self.session.scalar(query)
+        user.token = ''
+        user.userid = -1
+        await self.session.commit()
     async def get_user(self, event: TelegramObject):
         query = sa.select(UserModel).where(UserModel.id == event.from_user.id   )
         user = await self.session.scalar(query)
