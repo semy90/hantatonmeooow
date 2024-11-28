@@ -6,7 +6,7 @@ import aiohttp
 import asyncio
 import jwt as pyjwt
 
-from request.utils import append_rt, second_req
+from request.utils import append_rt, second_req, jwttort
 
 
 class Auth:
@@ -430,8 +430,9 @@ class Meetings:
                         return res.status
     @staticmethod
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
-                              durationx, participants:list, sendNotificationsAt, id_org, state, force=True):
+                              durationx, participants:list, sendNotificationsAt, state, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
+        id_org = (await jwttort(jwt))['user']["id"]
         params = {'force': force}
         json = {
             "name": name,
