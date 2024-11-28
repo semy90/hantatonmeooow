@@ -1,4 +1,6 @@
 import base64
+from asyncio import timeout
+from types import NoneType
 
 import aiohttp
 import asyncio
@@ -417,20 +419,22 @@ class Meetings:
         if roomId:
             params['roomId'] = roomId
         data = list()
-
-        async with aiohttp.ClientSession() as session:
-            while True:
+        new = None
+        while True:
+            async with aiohttp.ClientSession() as session:
                 async with session.get(url, params=params, headers={'Authorization': f'Bearer {jwt}'}) as res:
                     if res.status == 200:
-                        var = data.append(await res.json())['data']
+                        new = (await res.json())['data']
                     if res.status == 401:
-                        var = data.append((await second_req(jwt, url, session, {}))['data'])
-                    if res.status != 200 and data:
-                        return data
-                    if res.status != 200:
+                        new = (await second_req(jwt, url, session, {}))['data']
+                    if res.status not in [200, 401]:
                         return res.status
-                    params['page'] = params['page'] + 1
-
+                    if new:
+                        data += new
+                        params['page'] = params['page'] + 1
+                        continue
+                    else:
+                        return data
 
     @staticmethod
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
