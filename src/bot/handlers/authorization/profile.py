@@ -28,14 +28,15 @@ async def profile_user(query: CallbackQuery, session: AsyncSession):
     user = await database.get_user(query)
     data = await Account.info(user['token'])
     kb = [
-        [InlineKeyboardButton(text="Изменить ФИО", callback_data='change_name'),
-         InlineKeyboardButton(text="Изменить почту", callback_data='change_email')],
-        [InlineKeyboardButton(text="Изменить телефон", callback_data='phone')],
-        [InlineKeyboardButton(text="Назад", callback_data="auto_menu")]
+        [InlineKeyboardButton(text="🔁Изменить ФИО", callback_data='change_name'),
+         InlineKeyboardButton(text="🔄Изменить почту✉", callback_data='change_email')],
+        [InlineKeyboardButton(text="🔃Изменить телефон☎", callback_data='phone')],
+        [InlineKeyboardButton(text="↩Назад", callback_data="auto_menu")]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     s = data_sender(data)
-    await query.message.edit_text(text=s, reply_markup=keyboard)
+    pprint.pprint(data)
+    await query.message.edit_text(text=s, reply_markup=keyboard,parse_mode='html')
 
 
 @profile_router.callback_query(F.data == 'change_name')

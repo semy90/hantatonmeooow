@@ -15,8 +15,9 @@ from bot.states.authorization import AuthorizationState
 from bot.states.meetings import MeetingState
 from request.Users import Auth, Meetings
 from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorization_keyboard
-from src.database.gateway import Database
+from src.database.gateway import Database, VCSGateway
 from src.database.models.user import UserModel
+from utils.bcs_parser import bcs_parser
 from utils.changer import change
 
 all_bcs_router = Router(name=__name__)
@@ -25,8 +26,7 @@ all_bcs_router = Router(name=__name__)
 @all_bcs_router.callback_query(F.data == "conf")
 async def bcs(query: CallbackQuery):
     kb = [
-        [InlineKeyboardButton(text="Все конференции", callback_data=AllCallbackData(page=0).pack()),
-         InlineKeyboardButton(text="Ваши конференции", callback_data=YourCallbackData(page=0).pack())],
+        [InlineKeyboardButton(text="Создать конференцию", callback_data='create_conf')],
         [InlineKeyboardButton(text="Конференция по периоду", callback_data="search_conf")],
         [InlineKeyboardButton(text="Назад", callback_data="auto_menu")],
     ]
@@ -62,39 +62,60 @@ async def search_bcs(message: Message, state: FSMContext):
 
 
 @all_bcs_router.message(MeetingState.waiting_state)
-async def search_bcs(message: Message, state: FSMContext):
-    kb = [[InlineKeyboardButton(text="Продолжить", callback_data=AllCallbackData(page=0).pack())]]
+async def search_bcs(message: Message, session: AsyncSession, state: FSMContext):
+    kb = [[InlineKeyboardButton(text="Продолжить", callback_data=AllCallbackData(page=0).pack())],
+          [InlineKeyboardButton(text="Отмена", callback_data='cancel_meet')]]
+
+    vcs = VCSGateway(session)
+    await vcs.delete(message)
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
+    f = False
     if change(message.text) == 'Забранированные':
         await state.update_data(state='booked')
-        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
-        await state.set_state(MeetingState.confirm)
+        f = True
     elif change(message.text) == 'Отмененные':
         await state.update_data(state='cancelled')
-        await state.set_state(MeetingState.confirm)
-        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
+        f = True
     elif change(message.text) == 'Начавшиеся':
         await state.update_data(state='started')
-        await state.set_state(MeetingState.confirm)
-        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
+        f = True
     elif change(message.text) == 'Законченные':
         await state.update_data(state='ended')
-        await state.set_state(MeetingState.confirm)
-        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
+        f = True
     else:
         await message.answer("Выберите что-то из панели")
         await state.set_state(MeetingState.waiting_state)
+
+    if f:
+        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
+        await state.set_state(MeetingState.confirm)
 
 
 @all_bcs_router.callback_query(AllCallbackData.filter(), MeetingState.confirm)
 async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext, callback_data: AllCallbackData):
     database = Database(session)
+    vcs = VCSGateway(session)
+
     user = await database.get_user(query)
     data = await state.get_data()
+    D1 = str(datetime(year=int(data["fromData"].split('-')[0]),
+                  month=int(data["fromData"].split('-')[1]),
+                  day=int(data["fromData"].split('-')[2])))
+    D2 = str(datetime(year=int(data["toData"].split('-')[0]),
+                  month=int(data["toData"].split('-')[1]),
+                  day=int(data["toData"].split('-')[2])))
+    d1='T'.join(D1.split())
+    d2 = 'T'.join(D2.split())
 
-    all_meet = await Meetings.meetings(user['token'],f"{data['fromData']}T00:00:00.205318", f"{data['toData']}T00:00:00.205318")
-    print(all_meet)
-    count_bcs = len(all_meet)
+    meets = await vcs.get(query)
+    if meets is "":
+        tmp = await Meetings.meetings(user['token'],d1,d2)
+        await vcs.put(query,tmp)
+        meets = tmp
+
+
+    count_bcs = len(meets)
     cur = int(str(callback_data).split('=')[1])
     if count_bcs == 0:
         await query.message.edit_text("Нет конференций!")
@@ -105,10 +126,11 @@ async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext
     if cur > count_bcs - 1:
         cur = 0
 
-    cur_bcs = all_meet[cur]
-
+    curbcs = meets[cur]
+    cur_bcs = bcs_parser(curbcs)
     kb_bulder = InlineKeyboardBuilder()
-    kb_bulder.add(InlineKeyboardButton(text="<-", callback_data=AllCallbackData(page=cur - 1).pack()))
+    kb_bulder.row(InlineKeyboardButton(text=f"Подключиться к конференции", url=curbcs['permalink']))
+    kb_bulder.row(InlineKeyboardButton(text="<-", callback_data=AllCallbackData(page=cur - 1).pack()))
     kb_bulder.add(InlineKeyboardButton(text=f"{cur + 1}/{count_bcs}", callback_data='None'))
     kb_bulder.add(InlineKeyboardButton(text="->", callback_data=AllCallbackData(page=cur + 1).pack()))
     kb_bulder.row(InlineKeyboardButton(text="Назад", callback_data='auto_menu'))

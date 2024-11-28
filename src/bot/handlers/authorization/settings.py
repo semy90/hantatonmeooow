@@ -21,7 +21,7 @@ settings_router = Router(name=__name__)
 @settings_router.callback_query(F.data == "settings")
 async def settings_user(query: CallbackQuery):
     kb = [
-        [InlineKeyboardButton(text="...", callback_data='None'),
+        [InlineKeyboardButton(text="Настройка оповещений", callback_data='None'),
          InlineKeyboardButton(text="Сменить пароль", callback_data='None')],
         [InlineKeyboardButton(text="Выйти из аккаунта", callback_data="logout")],
         [InlineKeyboardButton(text="Назад", callback_data="auto_menu")]

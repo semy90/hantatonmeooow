@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, \
     InlineKeyboardMarkup, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.enums.parse_mode import ParseMode
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,14 +32,14 @@ async def autoriz_handler(message: Message, state: FSMContext):
 async def auto_waiting_email(message: Message, state: FSMContext):
     await state.update_data(login=change(message.text))
 
-    await message.answer("Отлично, теперь пришлите пароль: ")
+    await message.answer("✅Отлично, теперь пришлите пароль: ")
     await state.set_state(AuthorizationState.waiting_password)
 
 
 @autoriz_router.message(AuthorizationState.waiting_password)
 async def auto_waiting_email(message: Message, state: FSMContext):
     await state.update_data(password=change(message.text))
-    await message.answer("Пароль принят!")
+    await message.answer("✅Пароль принят!")
     data = await state.get_data()
     kb = [
         [InlineKeyboardButton(text="Да", callback_data='yes_autoriz')],
@@ -46,8 +47,9 @@ async def auto_waiting_email(message: Message, state: FSMContext):
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     await message.answer(
-        f"Перепроверьте ваши данные\nlogin: {data.get("login")}\npassword: {data.get("password")}\n\nВсе верно?",
-        reply_markup=keyboard)
+        f"🤔Перепроверьте ваши данные\nlogin: {data.get("login")}\npassword: <span class='tg-spoiler'>{data.get('password')}</span>\nВсе верно?",
+        reply_markup=keyboard, parse_mode=ParseMode.HTML)
+
     await state.set_state(AuthorizationState.confirm_state)
 
 
@@ -55,13 +57,14 @@ async def auto_waiting_email(message: Message, state: FSMContext):
 async def answer(call: CallbackQuery, state: FSMContext, session: AsyncSession):
     data = await state.get_data()
     res = await Auth().login(data.get("login"), data.get("password"))
-
+    await call.message.delete()
     if type(res) == int:
-        await call.message.answer("Ошибка в логине или в пароле")
+        await call.message.answer("❌Ошибка в логине или в пароле❌")
     else:
         database = Database(session)
         await database.change_token_with_id(call, res)
-        await call.message.answer("Вы успешно авторизовались!\nДля продолжения прожмите /start")
+        await call.message.answer("✅Вы успешно авторизовались!\nДля продолжения <b>прожмите</b> /start",
+                                  parse_mode='html')
     await state.clear()
 
 
