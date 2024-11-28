@@ -429,7 +429,7 @@ class Meetings:
                         new = (await second_req(jwt, url, session, {}))['data']
                     if res.status not in [200, 401]:
                         return res.status
-                    if new:
+                    if new[0]['permalinkId']:
                         data += new
                         params['page'] = params['page'] + 1
                         continue
