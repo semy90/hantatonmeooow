@@ -403,13 +403,14 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
+    async def meetings(jwt, fromDatetime, toDatetime, userId=None, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
                        state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
             'toDatetime': toDatetime,
             'page': page,
+            'userId':userId,
             'sort_by': sort_by,
             'rowsPerPage': rowsPerPage,
             'state': state
@@ -429,7 +430,7 @@ class Meetings:
                         return res.status
     @staticmethod
     async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
-                              durationx, participants:list, sendNotificationsAt, state, force=True):
+                              durationx, participants:list, sendNotificationsAt, id_org, state, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {'force': force}
         json = {
@@ -444,6 +445,7 @@ class Meetings:
             "duration": durationx,
             "participants": participants,
             "sendNotificationsAt": sendNotificationsAt,
+            "organizedBy": {"id": id_org},
             "state": state
         }
         async with aiohttp.ClientSession() as session:
