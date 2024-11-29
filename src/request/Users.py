@@ -399,8 +399,9 @@ class Account:
 class Meetings:
     @staticmethod
     async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id',
-                       rowsPerPage=101,
-                       state='booked'):
+                       rowsPerPage=101, state=None):
+        if state is None:
+            state = ['booked', 'cancelled', 'started', 'ended']
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': min(fromDatetime, toDatetime),
