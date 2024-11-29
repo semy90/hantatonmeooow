@@ -9,7 +9,7 @@ from pprint import pprint
 
 async def main():
     t = (await Auth.login('hantaton10', '14Jiuqnr1sWWvo6G'))
-    token = t['token'].encode("utf-8")
-    pprint(await Meetings.create_meetings(t,'ТЕСТМЯУ',1, 1,1, 11,"2024-11-29T00:00:00", 150, "2024-11-29T00:00:00","booked"))
+    # pprint(await Meetings.meetings(t['token'], '2024-10-14T00:23:10.028081', '2024-12-14T20:23:10.028122', userId=t['user']['id']))
+    print(t['token'])
 
 asyncio.run(main())
