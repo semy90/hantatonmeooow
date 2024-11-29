@@ -19,7 +19,7 @@ from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorizati
 from src.database.gateway import Database
 from src.database.models.user import UserModel
 from utils.changer import change
-from utils.data_parser import data_parser
+from utils.data_parser import data_parser, meet_parser
 
 create_router = Router(name=__name__)
 
@@ -57,11 +57,21 @@ async def confirm_sending(query: CallbackQuery, session: AsyncSession, state: FS
     s = data_parser(dat['dat'])
     database = Database(session)
     user = await database.get_user(query)
-    await Meetings.create_meetings(user['token'], s['name'], s['isMicrophoneOn'], s['isVideoOn'],
-                                   s['isWaitingRoomEnabled'],
-                                   s['participantsCount'], s['startedAt'], s['durationx'], s['sendNotificationsAt'],
-                                   s['state'])
-    await query.message.answer("ВКС создана!")
+    data_about_meet = await Meetings.create_meetings(user['token'], s['name'], s['isMicrophoneOn'], s['isVideoOn'],
+                                                     s['isWaitingRoomEnabled'],
+                                                     s['participantsCount'], s['startedAt'], s['durationx'],
+                                                     s['sendNotificationsAt'],
+                                                     s['state'])
+
+    if (type(data_about_meet) == int):
+        await query.message.answer(f"Ошибка!")
+    else:
+        s = meet_parser(data_about_meet)
+        kb = [
+            [InlineKeyboardButton(text="Да", url=data_about_meet['permalink'])]
+        ]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
+        await query.message.answer(f"Информация о конференции:\n{s}", reply_markup=keyboard)
     await state.clear()
 
 

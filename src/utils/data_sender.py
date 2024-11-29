@@ -11,7 +11,7 @@ def data_sender(data: dict) -> str:
     😎Название: {data['department']['name']}({data['department']['shortName']})
     ❗Адрес: {data['department']['address']}
     ✉Почта: {data['department']['email']}
-    '''
+'''
     return s
 
 
