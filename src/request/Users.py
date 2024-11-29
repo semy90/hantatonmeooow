@@ -400,22 +400,22 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, userId=None, buildingId=None, roomId=None, page=1, sort_by='id',
+    async def meetings(jwt, fromDatetime, toDatetime, buildingId=None, roomId=None, page=1, sort_by='id',
                        rowsPerPage=101,
                        state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
-            'fromDatetime': fromDatetime,
-            'toDatetime': toDatetime,
+            'fromDatetime': min(fromDatetime, toDatetime),
+            'toDatetime': max(fromDatetime, toDatetime),
             'page': page,
-            'userId': userId,
+            'userId': (await jwttort(jwt))['user']['id'],
             'sort_by': sort_by,
             'rowsPerPage': rowsPerPage,
             'state': state
         }
-        if not buildingId is None:
+        if buildingId is not None:
             params['buildingId'] = buildingId
-        if not roomId is None:
+        if roomId is not None:
             params['roomId'] = roomId
         while True:
             async with aiohttp.ClientSession() as session:
