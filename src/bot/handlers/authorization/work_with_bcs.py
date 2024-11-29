@@ -26,12 +26,12 @@ all_bcs_router = Router(name=__name__)
 @all_bcs_router.callback_query(F.data == "conf")
 async def bcs(query: CallbackQuery):
     kb = [
-        [InlineKeyboardButton(text="Создать конференцию", callback_data='create_conf')],
-        [InlineKeyboardButton(text="Конференция по периоду", callback_data="search_conf")],
-        [InlineKeyboardButton(text="Назад", callback_data="auto_menu")],
+        [InlineKeyboardButton(text="➕Создать конференцию", callback_data='create_conf')],
+        [InlineKeyboardButton(text="📅Конференция по периоду", callback_data="search_conf")],
+        [InlineKeyboardButton(text="🔙Назад", callback_data="auto_menu")],
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
-    await query.message.edit_text("Выберите категорию", reply_markup=keyboard)
+    await query.message.edit_text("Выберите категорию:", reply_markup=keyboard)
 
 
 @all_bcs_router.callback_query(F.data == "search_conf")
@@ -128,13 +128,13 @@ async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext
     curbcs = meets[cur]
     cur_bcs = bcs_parser(curbcs)
     kb_bulder = InlineKeyboardBuilder()
-    kb_bulder.row(InlineKeyboardButton(text=f"Подключиться к конференции", url=curbcs['permalink']))
+    kb_bulder.row(InlineKeyboardButton(text=f"🔗Подключиться к конференции", url=curbcs['permalink']))
     kb_bulder.row(InlineKeyboardButton(text="<-", callback_data=AllCallbackData(page=cur - 1).pack()))
     kb_bulder.add(InlineKeyboardButton(text=f"{cur + 1}/{count_bcs}", callback_data='None'))
     kb_bulder.add(InlineKeyboardButton(text="->", callback_data=AllCallbackData(page=cur + 1).pack()))
-    kb_bulder.row(InlineKeyboardButton(text="Назад", callback_data='auto_menu'))
-    kb_bulder.row(InlineKeyboardButton(text="Открыть конференцию", web_app=WebAppInfo(url=curbcs['permalink'])))
+    kb_bulder.row(InlineKeyboardButton(text="🔙Назад", callback_data='auto_menu'))
+    kb_bulder.row(InlineKeyboardButton(text="🖥Открыть конференцию", web_app=WebAppInfo(url=curbcs['permalink'])))
 
     await query.message.edit_text(
-        f"Вся информация о конференции:\n{cur_bcs}"
+        f"<b>Вся информация о конференции</b>:\n{cur_bcs}"
         , reply_markup=kb_bulder.as_markup())

@@ -18,7 +18,7 @@ start_router = Router(name=__name__)
 @start_router.message(CommandStart(), NotAuthorizationFilter())
 async def start_handler(message: Message, state : FSMContext):
     await state.clear()
-    await message.answer('🖐Приветствую вас в меню бота!🖐\nДля продолжения работы в системе, пройдите авторизацию',
+    await message.answer('🖐Приветствую вас в меню бота!🤖\nДля продолжения работы в системе, пройдите авторизацию',
                          reply_markup=not_authorization_keyboard()
                          )
 
@@ -26,14 +26,14 @@ async def start_handler(message: Message, state : FSMContext):
 @start_router.message(CommandStart(), AuthorizationFilter())
 async def start_handler(message: Message,state : FSMContext):
     await state.clear()
-    await message.answer('🖐Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
+    await message.answer('🖐Приветствую вас в меню бота!🤖\nВот вся доступная информация на данный момент: ',
                          reply_markup=authorization_keyboard()
                          )
 
 
 @start_router.callback_query(F.data == "auto_menu")
 async def start_handler(query: CallbackQuery,state:FSMContext):
-    await query.message.edit_text('Приветствую вас в меню бота!\nВот вся доступная информация на данный момент: ',
+    await query.message.edit_text('🖐Приветствую вас в меню бота!🤖\nВот вся доступная информация на данный момент: ',
                                reply_markup=authorization_keyboard()
                                )
     await state.clear()

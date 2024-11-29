@@ -21,14 +21,14 @@ settings_router = Router(name=__name__)
 @settings_router.callback_query(F.data == "settings")
 async def settings_user(query: CallbackQuery):
     kb = [
-        [InlineKeyboardButton(text="Настройка оповещений", callback_data='None'),
-         InlineKeyboardButton(text="Сменить пароль", callback_data='None')],
-        [InlineKeyboardButton(text="Выйти из аккаунта", callback_data="logout")],
-        [InlineKeyboardButton(text="Назад", callback_data="auto_menu")]
+        [InlineKeyboardButton(text="🔔Настройка оповещений", callback_data='None'),
+         InlineKeyboardButton(text="🔄Сменить пароль", callback_data='None')],
+        [InlineKeyboardButton(text="🔚Выйти из аккаунта", callback_data="logout")],
+        [InlineKeyboardButton(text="🔙Назад", callback_data="auto_menu")]
 
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
-    await query.message.edit_text("Настройки аккаунта:", reply_markup=keyboard)
+    await query.message.edit_text("⚙Настройки вашего аккаунта аккаунта:", reply_markup=keyboard)
 
 
 @settings_router.callback_query(F.data == "logout")
@@ -37,4 +37,4 @@ async def logout(query: CallbackQuery, session: AsyncSession):
     user = await database.get_user(query)
     await Auth.logout(user['token'])
     await database.delete_user(query)
-    await query.message.answer("Вы вышли из аккаунта")
+    await query.message.answer("‼Вы вышли из аккаунта‼")

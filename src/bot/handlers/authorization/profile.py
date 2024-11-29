@@ -1,3 +1,4 @@
+import asyncio
 import pprint
 import re
 from aiogram import F, Router
@@ -35,7 +36,6 @@ async def profile_user(query: CallbackQuery, session: AsyncSession):
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     s = data_sender(data)
-    pprint.pprint(data)
     await query.message.edit_text(text=s, reply_markup=keyboard,parse_mode='html')
 
 
@@ -68,7 +68,7 @@ async def change_lastname(message: Message, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     await state.set_state(UserNameState.waiting_middlename)
-    await message.answer("Пришлите новое ОТЧЕСТВО пользователя!", reply_markup=keyboard)
+    await message.answer("Пришлите новое <b><отчество/b> пользователя!", reply_markup=keyboard)
 
 
 @profile_router.message(UserNameState.waiting_middlename)
@@ -89,7 +89,7 @@ async def change_middlename(message: Message, state: FSMContext):
 
     s = data_for_change_name(data)
     if s == '':
-        await message.answer("Изменений нет!",keyboard=ReplyKeyboardRemove())
+        await message.answer("Изменений нет❗",keyboard=ReplyKeyboardRemove())
         await state.clear()
     else:
         await state.set_state(UserNameState.confirm_state)
