@@ -1,10 +1,7 @@
 import base64
-from asyncio import timeout
-from types import NoneType
 
 import aiohttp
 import asyncio
-import jwt as pyjwt
 
 from request.utils import append_rt, second_req, jwttort
 
@@ -403,14 +400,15 @@ class Account:
 
 class Meetings:
     @staticmethod
-    async def meetings(jwt, fromDatetime, toDatetime, userId=None, buildingId=None, roomId=None, page=1, sort_by='id', rowsPerPage=101,
+    async def meetings(jwt, fromDatetime, toDatetime, userId=None, buildingId=None, roomId=None, page=1, sort_by='id',
+                       rowsPerPage=101,
                        state='booked'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         params = {
             'fromDatetime': fromDatetime,
             'toDatetime': toDatetime,
             'page': page,
-            'userId':userId,
+            'userId': userId,
             'sort_by': sort_by,
             'rowsPerPage': rowsPerPage,
             'state': state
@@ -428,34 +426,56 @@ class Meetings:
                         return (await second_req(jwt, url, session, {}))['data']
                     if res.status not in [200, 401]:
                         return res.status
+
     @staticmethod
-    async def create_meetings(jwt, name:str, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount : int, startedAt:str,
-                              durationx:int, sendNotificationsAt:str, state, force='true'):
+    async def create_meetings(jwt, name: str, isMicrophoneOn: bool, isVideoOn: bool, isWaitingRoomEnabled: bool,
+                              participantsCount: int, startedAt: str,
+                              durationx: int, sendNotificationsAt: str, isGovernorPresents=False,
+                              isNotifyAccepted=False, backend='cisco', state="booked", isVirtual=False, force=True):
         url = f'https://test.vcc.uriit.ru/api/meetings'
-        id_org = (await jwttort(jwt))['user']["id"]
+        id_org = (await jwttort(jwt))['user']
         params = {
-            'force': "true"
+            'force': 'true' if force else 'false'
         }
         json = {
             "name": name,
             "ciscoSettings": {
-                "isMicrophoneOn":isMicrophoneOn,
-                "isVideoOn": isVideoOn,
-                "isWaitingRoomEnabled": isWaitingRoomEnabled
+                "isMicrophoneOn": 'true' if isMicrophoneOn else 'false',
+                "isVideoOn": 'true' if isVideoOn else 'false',
+                "isWaitingRoomEnabled": 'true' if isWaitingRoomEnabled else 'false',
+                "needVideoRecording": 'false'
             },
             "participantsCount": participantsCount,
             "startedAt": startedAt,
             "duration": durationx,
-            "participants": [id_org],
+            'isVirtual': 'true' if isVirtual else 'false',
+            "participants": [
+                {
+                    'id': id_org["id"]
+                },
+                {
+                    "email": id_org.get('email'),
+                    "lastName": id_org.get('lastName'),
+                    "firstName": id_org.get('firstName'),
+                    "middleName": id_org.get('middleName')
+                }
+            ],
             "sendNotificationsAt": sendNotificationsAt,
-            "state": "booked"
+            "recurrenceUpdateType": "only",
+            'isGovernorPresents': 'true' if isGovernorPresents else 'false',
+            'isNotifyAccepted': 'true' if isNotifyAccepted else 'false',
+            "organizedBy": {"id": id_org["id"]},
+            'backend': backend,
+            "state": state
         }
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, params=params, json=json, headers={'Authorization': f'Bearer {jwt}'}) as res:
+            async with session.post(url, json=json, headers={'Authorization': f'Bearer {jwt}'}, params=params) as res:
                 if res.status == 201:
                     return await res.json()
                 if res.status == 401:
                     return await second_req(jwt, url, session, json)
+                if res.status == 422:
+                    return await res.json()
                 return res.status
 
     @staticmethod
@@ -481,15 +501,3 @@ class Departments:
                 if res.status == 401:
                     return await second_req(jwt, url, session, {})
                 return res.status
-
-
-
-
-
-
-
-
-
-
-
-

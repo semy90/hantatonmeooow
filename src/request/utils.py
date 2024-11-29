@@ -4,7 +4,8 @@ import base64
 import json
 
 async def jwttort(jwt):
-    rt = jwt['token'].split('.')[1]
+
+    rt = (jwt['token'] if type(jwt) == dict else jwt).split('.')[1]
     rt = rt.encode('utf-8')
     rt = base64.b64decode(rt + b'=' * (-len(rt) % 4))
     rt = rt.decode('utf-8')
