@@ -1,7 +1,5 @@
 import base64
-
 import aiohttp
-import asyncio
 
 from request.utils import append_rt, second_req, jwttort
 
