@@ -28,10 +28,10 @@ async def profile_user(query: CallbackQuery, session: AsyncSession):
     user = await database.get_user(query)
     data = await Account.info(user['token'])
     kb = [
-        [InlineKeyboardButton(text="🔁Изменить ФИО", callback_data='change_name'),
+        [InlineKeyboardButton(text="🔄Изменить ФИО", callback_data='change_name'),
          InlineKeyboardButton(text="🔄Изменить почту✉", callback_data='change_email')],
-        [InlineKeyboardButton(text="🔃Изменить телефон☎", callback_data='phone')],
-        [InlineKeyboardButton(text="↩Назад", callback_data="auto_menu")]
+        [InlineKeyboardButton(text="🔄Изменить телефон☎", callback_data='phone')],
+        [InlineKeyboardButton(text="🔙Назад", callback_data="auto_menu")]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     s = data_sender(data)
@@ -43,7 +43,7 @@ async def profile_user(query: CallbackQuery, session: AsyncSession):
 async def change_firstname(query: CallbackQuery, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await query.message.answer("Пришлите новое ИМЯ пользователя!", reply_markup=keyboard)
+    await query.message.answer("Пришлите новое <b>имя</b> пользователя!", reply_markup=keyboard)
     await state.set_state(UserNameState.waiting_firstname)
 
 
@@ -56,7 +56,7 @@ async def change_lastname(message: Message, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     await state.set_state(UserNameState.waiting_lastname)
-    await message.answer("Пришлите новую ФАМИЛИЮ пользователя!", reply_markup=keyboard)
+    await message.answer("Пришлите новую <b>фамилию</b> пользователя!", reply_markup=keyboard)
 
 
 @profile_router.message(UserNameState.waiting_lastname)

@@ -22,11 +22,11 @@ def data_parser(s: str):
 
 
 def meet_parser(d:dict):
-    s = f'''Название: {d['name']}
-Время начала: {d['startedAt'].split('T')[0]} {d['startedAt'].split('T')[1]}
-Время конца: {d['endedAt'].split('T')[0]} {d['endedAt'].split('T')[1]}
-Длительность: {d['duration']}
-Организатор: {d['organizedUser']['lastName']} {d['organizedUser']['firstName']} {d['organizedUser']['middleName']}
-Почта организатора {d['organizedUser']['email']}
+    s = f'''<b>Название</b>: {d['name']}
+🕐Время начала: {d['startedAt'].split('T')[0]} {d['startedAt'].split('T')[1]}
+🕘Время конца: {d['endedAt'].split('T')[0]} {d['endedAt'].split('T')[1]}
+⏳Длительность: {d['duration']}
+😎Организатор: {d['organizedUser']['lastName']} {d['organizedUser']['firstName']} {d['organizedUser']['middleName']}
+📧Почта организатора {d['organizedUser']['email']}
 '''
     return s

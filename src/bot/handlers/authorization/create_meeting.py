@@ -1,19 +1,25 @@
+import asyncio
+import json
 import pprint
 import re
-from aiogram import F, Router
+
+import aioschedule
+from aiogram import F, Router, Bot
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, \
-    InlineKeyboardMarkup, ReplyKeyboardRemove
+    InlineKeyboardMarkup, ReplyKeyboardRemove, TelegramObject, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.enums.parse_mode import ParseMode
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot.callback_data.meet import CreateCallbackData
 from bot.filters.is_autorization import NotAuthorizationFilter
 from bot.filters.is_creator_vcs import CreatorFilter
 from bot.states.authorization import AuthorizationState
 from bot.states.create_meet import CreateState
+from bot.states.creating_newsletter import CreateNewsletterState
 from request.Users import Auth, Meetings
 from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorization_keyboard
 from src.database.gateway import Database
@@ -67,11 +73,13 @@ async def confirm_sending(query: CallbackQuery, session: AsyncSession, state: FS
         await query.message.answer(f"Ошибка!")
     else:
         s = meet_parser(data_about_meet)
+
         kb = [
-            [InlineKeyboardButton(text="Да", url=data_about_meet['permalink'])]
+            [InlineKeyboardButton(text="Ссылка на конференцию", url=data_about_meet['permalink'])],
+            [InlineKeyboardButton(text="Открыть конференцию", web_app=WebAppInfo(url=data_about_meet['permalink']))]
         ]
         keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
-        await query.message.answer(f"Информация о конференции:\n{s}", reply_markup=keyboard)
+        await query.message.answer(f"⚠Информация о конференции⚠\n{s}", reply_markup=keyboard, parse_mode='html')
     await state.clear()
 
 
@@ -79,3 +87,5 @@ async def confirm_sending(query: CallbackQuery, session: AsyncSession, state: FS
 async def confirm_sending(query: CallbackQuery, state: FSMContext):
     await query.message.answer("Отменяю...")
     await state.clear()
+
+

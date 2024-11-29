@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, \
-    InlineKeyboardMarkup, ReplyKeyboardRemove
+    InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -100,20 +100,19 @@ async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext
     user = await database.get_user(query)
     data = await state.get_data()
     D1 = str(datetime(year=int(data["fromData"].split('-')[0]),
-                  month=int(data["fromData"].split('-')[1]),
-                  day=int(data["fromData"].split('-')[2])))
+                      month=int(data["fromData"].split('-')[1]),
+                      day=int(data["fromData"].split('-')[2])))
     D2 = str(datetime(year=int(data["toData"].split('-')[0]),
-                  month=int(data["toData"].split('-')[1]),
-                  day=int(data["toData"].split('-')[2])))
-    d1='T'.join(D1.split())
+                      month=int(data["toData"].split('-')[1]),
+                      day=int(data["toData"].split('-')[2])))
+    d1 = 'T'.join(D1.split())
     d2 = 'T'.join(D2.split())
 
     meets = await vcs.get(query)
     if meets is "":
-        tmp = await Meetings.meetings(user['token'],d1,d2)
-        await vcs.put(query,tmp)
+        tmp = await Meetings.meetings(user['token'], d1, d2)
+        await vcs.put(query, tmp)
         meets = tmp
-
 
     count_bcs = len(meets)
     cur = int(str(callback_data).split('=')[1])
@@ -134,6 +133,7 @@ async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext
     kb_bulder.add(InlineKeyboardButton(text=f"{cur + 1}/{count_bcs}", callback_data='None'))
     kb_bulder.add(InlineKeyboardButton(text="->", callback_data=AllCallbackData(page=cur + 1).pack()))
     kb_bulder.row(InlineKeyboardButton(text="Назад", callback_data='auto_menu'))
+    kb_bulder.row(InlineKeyboardButton(text="Открыть конференцию", web_app=WebAppInfo(url=curbcs['permalink'])))
 
     await query.message.edit_text(
         f"Вся информация о конференции:\n{cur_bcs}"
