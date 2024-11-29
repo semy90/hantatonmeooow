@@ -429,25 +429,26 @@ class Meetings:
                     if res.status not in [200, 401]:
                         return res.status
     @staticmethod
-    async def create_meetings(jwt, name, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount, startedAt,
-                              durationx, participants:list, sendNotificationsAt, state, force=True):
+    async def create_meetings(jwt, name:str, isMicrophoneOn:bool, isVideoOn:bool, isWaitingRoomEnabled:bool, participantsCount : int, startedAt:str,
+                              durationx:int, sendNotificationsAt:str, state, force='true'):
         url = f'https://test.vcc.uriit.ru/api/meetings'
         id_org = (await jwttort(jwt))['user']["id"]
-        params = {'force': force}
+        params = {
+            'force': "true"
+        }
         json = {
             "name": name,
             "ciscoSettings": {
-                "isMicrophoneOn": isMicrophoneOn,
+                "isMicrophoneOn":isMicrophoneOn,
                 "isVideoOn": isVideoOn,
                 "isWaitingRoomEnabled": isWaitingRoomEnabled
             },
             "participantsCount": participantsCount,
             "startedAt": startedAt,
             "duration": durationx,
-            "participants": participants,
+            "participants": [id_org],
             "sendNotificationsAt": sendNotificationsAt,
-            "organizedBy": {"id": id_org},
-            "state": state
+            "state": "booked"
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(url, params=params, json=json, headers={'Authorization': f'Bearer {jwt}'}) as res:

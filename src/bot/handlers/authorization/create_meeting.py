@@ -46,23 +46,24 @@ async def send_data(message: Message, state: FSMContext):
         [InlineKeyboardButton(text="Нет", callback_data='no_create_conf')]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
-    await state.update_data(data=message.text)
-    print(message.text)
+    await state.update_data(dat=message.text)
     await message.answer("Данные получены, создать вкс?", reply_markup=keyboard)
     await state.set_state(CreateState.confirm_state)
 
 
 @create_router.callback_query(CreateState.confirm_state, F.data == 'yes_create_conf')
 async def confirm_sending(query: CallbackQuery, session: AsyncSession, state: FSMContext):
-    data = await state.get_data()
-    s = data_parser(data['data'])
+    dat = await state.get_data()
+    s = data_parser(dat['dat'])
     database = Database(session)
     user = await database.get_user(query)
-    await Meetings.create_meetings(user['token'], s['isMicrophoneOn'], s['isVideoOn'], s['isWaitingRoomEnabled'],
-                                   s['participantsCount'], s['startedAt'] ,s['durationx'] ,s['sendNotificationsAt'],
+    await Meetings.create_meetings(user['token'], s['name'], s['isMicrophoneOn'], s['isVideoOn'],
+                                   s['isWaitingRoomEnabled'],
+                                   s['participantsCount'], s['startedAt'], s['durationx'], s['sendNotificationsAt'],
                                    s['state'])
     await query.message.answer("ВКС создана!")
     await state.clear()
+
 
 @create_router.callback_query(CreateState.confirm_state, F.data == 'no_create_conf')
 async def confirm_sending(query: CallbackQuery, state: FSMContext):
