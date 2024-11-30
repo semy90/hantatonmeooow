@@ -1,4 +1,6 @@
-from datetime import datetime, date
+import asyncio
+import pprint
+import datetime
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command, StateFilter
@@ -9,9 +11,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot.callback_data.meet import NotificationCallbackData
 from bot.callback_data.page_factory import AllCallbackData, YourCallbackData
 from bot.filters.is_autorization import NotAuthorizationFilter
 from bot.states.authorization import AuthorizationState
+from bot.states.creating_newsletter import CreateNewsletterState
 from bot.states.meetings import MeetingState
 from request.Users import Auth, Meetings
 from src.bot.keyboards.main_funcs import not_authorization_keyboard, authorization_keyboard
@@ -19,8 +23,11 @@ from src.database.gateway import Database, VCSGateway
 from src.database.models.user import UserModel
 from utils.bcs_parser import bcs_parser
 from utils.changer import change
+from utils.data_parser import meet_parser, meet_parser1
 
 all_bcs_router = Router(name=__name__)
+link1 = ''
+meet_data1 = ''
 
 
 @all_bcs_router.callback_query(F.data == "conf")
@@ -88,28 +95,30 @@ async def search_bcs(message: Message, session: AsyncSession, state: FSMContext)
         await state.set_state(MeetingState.waiting_state)
 
     if f:
-        await message.answer("Ваши данные формируются для продолжения нажмите ниже", reply_markup=keyboard)
+        await message.answer("Ваши данные формируются для продолжения нажмите ниже", keyboard=ReplyKeyboardRemove(),
+                             reply_markup=keyboard)
         await state.set_state(MeetingState.confirm)
 
 
 @all_bcs_router.callback_query(AllCallbackData.filter(), MeetingState.confirm)
 async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext, callback_data: AllCallbackData):
+    global meet_data1,link1
     database = Database(session)
     vcs = VCSGateway(session)
 
     user = await database.get_user(query)
     data = await state.get_data()
-    D1 = str(datetime(year=int(data["fromData"].split('-')[0]),
+    D1 = str(datetime.datetime (year=int(data["fromData"].split('-')[0]),
                       month=int(data["fromData"].split('-')[1]),
                       day=int(data["fromData"].split('-')[2])))
-    D2 = str(datetime(year=int(data["toData"].split('-')[0]),
+    D2 = str(datetime.datetime(year=int(data["toData"].split('-')[0]),
                       month=int(data["toData"].split('-')[1]),
                       day=int(data["toData"].split('-')[2])))
     d1 = 'T'.join(D1.split())
     d2 = 'T'.join(D2.split())
 
     meets = await vcs.get(query)
-    if meets is "":
+    if meets == "":
         tmp = await Meetings.meetings(user['token'], d1, d2)
         await vcs.put(query, tmp)
         meets = tmp
@@ -126,15 +135,47 @@ async def all_bcs(query: CallbackQuery, session: AsyncSession, state: FSMContext
         cur = 0
 
     curbcs = meets[cur]
-    cur_bcs = bcs_parser(curbcs)
-    kb_bulder = InlineKeyboardBuilder()
-    kb_bulder.row(InlineKeyboardButton(text=f"🔗Подключиться к конференции", url=curbcs['permalink']))
-    kb_bulder.row(InlineKeyboardButton(text="<-", callback_data=AllCallbackData(page=cur - 1).pack()))
-    kb_bulder.add(InlineKeyboardButton(text=f"{cur + 1}/{count_bcs}", callback_data='None'))
-    kb_bulder.add(InlineKeyboardButton(text="->", callback_data=AllCallbackData(page=cur + 1).pack()))
-    kb_bulder.row(InlineKeyboardButton(text="🔙Назад", callback_data='auto_menu'))
-    kb_bulder.row(InlineKeyboardButton(text="🖥Открыть конференцию", web_app=WebAppInfo(url=curbcs['permalink'])))
 
+    # cur_bcs = bcs_parser(curbcs)
+    cur_bcs = meet_parser1(curbcs)
+
+    kb = [
+        [InlineKeyboardButton(text="⏪", callback_data=AllCallbackData(page=cur - 1).pack()),
+         InlineKeyboardButton(text=f"{cur + 1}/{count_bcs}", callback_data='None'),
+         InlineKeyboardButton(text="⏩", callback_data=AllCallbackData(page=cur + 1).pack())],
+        [InlineKeyboardButton(text=f"🔗Подключиться к конференции", url=curbcs['permalink'])],
+        [InlineKeyboardButton(text="🖥Открыть конференцию", web_app=WebAppInfo(url=curbcs['permalink']))],
+        [InlineKeyboardButton(text="🔔Создать уведомление", callback_data="ni_noutification")],
+        [InlineKeyboardButton(text="🔙Назад", callback_data='auto_menu')]
+
+    ]
+    link1 = curbcs['permalink']
+    meet_data1 = cur_bcs
+    keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
     await query.message.edit_text(
         f"<b>Вся информация о конференции</b>:\n{cur_bcs}"
-        , reply_markup=kb_bulder.as_markup())
+        , reply_markup=keyboard, parse_mode='html')
+
+
+@all_bcs_router.callback_query(F.data == 'ni_noutification')
+async def notification(query: CallbackQuery, state: FSMContext):
+    await query.message.answer("Пришлите время для уведомления!")
+    await state.set_state(CreateNewsletterState.waiting_data)
+
+
+@all_bcs_router.message(CreateNewsletterState.waiting_data)
+async def nouf_send(message: Message, state: FSMContext):
+    global link1, meet_data1
+    ymd, hm = message.text.split(' ')
+
+    dt = datetime.datetime(year=int(ymd.split('-')[0]), month=int(ymd.split('-')[1]), day=int(ymd.split('-')[2]),
+                           hour=int(hm.split(':')[0]), minute=int(hm.split(':')[1]), second=0)
+    delta = (dt - datetime.datetime.now()).total_seconds()
+
+    info = str(await state.get_data())
+    await asyncio.sleep(delta)
+    kb = [
+        [InlineKeyboardButton(text="Ссылка на конференцию", url=link1)],
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=kb)
+    await message.answer(text=meet_data1, reply_markup=keyboard,parse_mode="html")

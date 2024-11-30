@@ -27,6 +27,13 @@ def meet_parser(d:dict):
 🕘Время конца: {d['endedAt'].split('T')[0]} {d['endedAt'].split('T')[1]}
 ⏳Длительность: {d['duration']}
 😎Организатор: {d['organizedUser']['lastName']} {d['organizedUser']['firstName']} {d['organizedUser']['middleName']}
-📧Почта организатора {d['organizedUser']['email']}
+📧Почта организатора: {d['organizedUser']['email']}
+'''
+    return s
+def meet_parser1(d:dict):
+    s = f'''<b>Название</b>: {d['name']}
+🕐Время начала: {d['startedAt'].split('T')[0]} {d['startedAt'].split('T')[1]}
+🕘Время конца: {d['endedAt'].split('T')[0]} {d['endedAt'].split('T')[1]}
+⏳Длительность: {d['duration']}
 '''
     return s

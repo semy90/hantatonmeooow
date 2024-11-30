@@ -13,7 +13,7 @@ from database.session import init_db
 import config
 
 async def main():
-    bot = Bot(token=str(os.environ.get("TOKEN")),default=DefaultBotProperties(parse_mode='html'))
+    bot = Bot(token=str(os.environ.get("TOKEN")))
     dp = Dispatcher()
 
     settings = {"path": "../database.sqlite3"}

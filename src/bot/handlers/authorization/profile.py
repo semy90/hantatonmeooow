@@ -43,7 +43,7 @@ async def profile_user(query: CallbackQuery, session: AsyncSession):
 async def change_firstname(query: CallbackQuery, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await query.message.answer("Пришлите новое <b>имя</b> пользователя!", reply_markup=keyboard)
+    await query.message.answer("Пришлите новое <b>имя</b> пользователя!", reply_markup=keyboard,parse_mode="html")
     await state.set_state(UserNameState.waiting_firstname)
 
 
@@ -56,7 +56,7 @@ async def change_lastname(message: Message, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     await state.set_state(UserNameState.waiting_lastname)
-    await message.answer("Пришлите новую <b>фамилию</b> пользователя!", reply_markup=keyboard)
+    await message.answer("Пришлите новую <b>фамилию</b> пользователя!", reply_markup=keyboard,parse_mode="html")
 
 
 @profile_router.message(UserNameState.waiting_lastname)
@@ -68,7 +68,7 @@ async def change_lastname(message: Message, state: FSMContext):
     kb = [[KeyboardButton(text="Оставить текущее")]]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     await state.set_state(UserNameState.waiting_middlename)
-    await message.answer("Пришлите новое <b><отчество/b> пользователя!", reply_markup=keyboard)
+    await message.answer("Пришлите новое <b><отчество</b> пользователя!", reply_markup=keyboard,parse_mode="html")
 
 
 @profile_router.message(UserNameState.waiting_middlename)
